@@ -163,7 +163,7 @@ static void fakeNotifications() {
 
 -(id)init {
     id orig = %orig;
-    self.sxiStackedNotificationRequests = [[NSMutableOrderedSet alloc] init];
+    self.sxiStackedNotificationRequests = [NSMutableOrderedSet new];
     self.sxiVisible = true;
     self.sxiIsStack = false;
     self.sxiIsExpanded = false;
@@ -287,7 +287,7 @@ static void fakeNotifications() {
     NSLog(@"[StackXI] Init!");
     id orig = %orig;
     priorityList = self;
-    self.sxiAllRequests = [[NSMutableOrderedSet alloc] initWithCapacity:1000];
+    self.sxiAllRequests = [NSMutableOrderedSet new];
     return orig;
 }
 
@@ -296,7 +296,7 @@ static void fakeNotifications() {
     if (!canUpdate) return;
     [self.requests removeAllObjects];
 
-    NSMutableDictionary* stacks = [[NSMutableDictionary alloc] initWithCapacity:1000];
+    NSMutableDictionary* stacks = [NSMutableDictionary new];
 
     for (int i = 0; i < [self.sxiAllRequests count]; i++) {
         NCNotificationRequest *req = self.sxiAllRequests[i];
@@ -1032,7 +1032,7 @@ static void fakeNotifications() {
 
 %new
 -(void)sxiCollapseAll {
-    NSMutableOrderedSet *sectionIDs = [[NSMutableOrderedSet alloc] initWithCapacity:100];
+    NSMutableOrderedSet *sectionIDs = [NSMutableOrderedSet new];
 
     for (NCNotificationRequest *request in priorityList.requests) {
         if (!request.bulletin.sectionID) continue;
@@ -1048,7 +1048,7 @@ static void fakeNotifications() {
 
 %new
 -(void)sxiExpand:(NSString *)sectionID {
-    NSMutableOrderedSet *sectionIDs = [[NSMutableOrderedSet alloc] initWithCapacity:100];
+    NSMutableOrderedSet *sectionIDs = [NSMutableOrderedSet new];
     [sectionIDs addObject:sectionID];
 
     // DON'T REPLACE THIS WITH sxiCollapseAll; it doesn't work because of that line above
