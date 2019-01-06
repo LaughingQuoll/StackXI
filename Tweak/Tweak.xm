@@ -755,9 +755,9 @@ static void fakeNotifications() {
 %new
 -(CGRect)sxiGetTitleFrame {
     if (self.sxiIsLTR) {
-        return CGRectMake(self.view.frame.origin.x + buttonSpacing, self.view.frame.origin.y, self.view.frame.size.width - (buttonSpacing*3) - (buttonWidth*2), buttonHeight + buttonSpacing*2);
+        return CGRectMake(self.view.frame.origin.x + buttonSpacing*2, self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - (buttonSpacing*4) - (buttonWidth*2), buttonHeight - buttonSpacing/2.0);
     } else {
-        return CGRectMake(self.view.frame.origin.x - (buttonSpacing*2) - (buttonWidth*2), self.view.frame.origin.y, self.view.frame.size.width + (buttonSpacing*3) + (buttonWidth*2), buttonHeight + buttonSpacing*2);
+        return CGRectMake(self.view.frame.origin.x + (buttonSpacing*4) + (buttonWidth*2), self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - buttonSpacing*2, buttonHeight - buttonSpacing/2.0);
     }
 }
 
@@ -810,7 +810,7 @@ static void fakeNotifications() {
             //self.sxiClearAllButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
             [self.sxiClearAllButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
             self.sxiClearAllButton.layer.masksToBounds = true;
-            self.sxiClearAllButton.layer.cornerRadius = 12.5;
+            self.sxiClearAllButton.layer.cornerRadius = buttonHeight/2.0;
             [self.sxiClearAllButton addBlurEffect];
 
             self.sxiCollapseButton = [[UIButton alloc] initWithFrame:[self sxiGetCollapseButtonFrame]];
@@ -821,13 +821,18 @@ static void fakeNotifications() {
             //self.sxiCollapseButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
             [self.sxiCollapseButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
             self.sxiCollapseButton.layer.masksToBounds = true;
-            self.sxiCollapseButton.layer.cornerRadius = 12.5;
+            self.sxiCollapseButton.layer.cornerRadius = buttonHeight/2.0;
             [self.sxiCollapseButton addBlurEffect];
             
             [self.sxiClearAllButton addTarget:self action:@selector(sxiClearAll:) forControlEvents:UIControlEventTouchUpInside];
             [self.sxiCollapseButton addTarget:self action:@selector(sxiCollapse:) forControlEvents:UIControlEventTouchUpInside];
             
             if (useIcons) {
+                float inset = 2.5;
+                if (showButtons == 2) inset = 5.0;
+                self.sxiClearAllButton.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
+                self.sxiCollapseButton.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
+
                 self.sxiCollapseButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
                 [self.sxiCollapseButton setTitle:NULL forState:UIControlStateNormal];
                 UIImage *btnCollapseImage = [UIImage imageWithContentsOfFile:ICON_COLLAPSE_PATH];
@@ -844,7 +849,7 @@ static void fakeNotifications() {
 
             if (showButtons == 2) {
                 self.sxiTitle = [[UILabel alloc] initWithFrame:[self sxiGetTitleFrame]];
-                [self.sxiTitle setFont:[UIFont systemFontOfSize:buttonHeight]];
+                [self.sxiTitle setFont:[UIFont systemFontOfSize:buttonHeight - buttonSpacing]];
                 self.sxiTitle.numberOfLines = 1;
                 self.sxiTitle.clipsToBounds = YES;
                 self.sxiTitle.hidden = YES;
