@@ -21,10 +21,10 @@ static NCNotificationListCollectionView *listCollectionView = nil;
 static NCNotificationCombinedListViewController *clvc = nil;
 static NCNotificationStore *store = nil;
 static NCNotificationDispatcher *dispatcher = nil;
-static bool showButtons = false;
 static bool useIcons = false;
 static bool canUpdate = true;
 static bool isOnLockscreen = true;
+static int showButtons = 2; // 0 - StackXI default; 1 - iOS 12
 static NSDictionary<NSString*, NSString*> *translationDict;
 
 UIImage * imageWithView(UIView *view) {
@@ -165,6 +165,7 @@ static void fakeNotifications() {
 
 %new
 -(void)sxiExpand {
+    if (self.sxiIsExpanded) return;
     self.sxiIsExpanded = true;
 
     for (NCNotificationRequest *request in self.sxiStackedNotificationRequests) {
@@ -177,6 +178,7 @@ static void fakeNotifications() {
 
 %new
 -(void)sxiCollapse {
+    if (!self.sxiIsExpanded) return;
     self.sxiIsExpanded = false;
 
     for (NCNotificationRequest *request in self.sxiStackedNotificationRequests) {
@@ -667,6 +669,8 @@ static void fakeNotifications() {
 %property (retain) UIButton* sxiClearAllButton;
 %property (retain) UIButton* sxiCollapseButton;
 %property (assign,nonatomic) BOOL sxiIsLTR;
+%property (assign,nonatomic) CGRect sxiOrigSVFrame;
+%property (assign,nonatomic) CGRect sxiOrigCVFrame;
 
 -(void)viewWillAppear:(bool)whatever {
     %orig;
@@ -774,7 +778,7 @@ static void fakeNotifications() {
         self.sxiNotificationCount.textColor = [[UIColor blackColor] colorWithAlphaComponent:0.8];
         [self.view addSubview:self.sxiNotificationCount];
 
-        if (showButtons) {
+        if (showButtons > 0) {
             self.sxiClearAllButton = [[UIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
             [self.sxiClearAllButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
             self.sxiClearAllButton.hidden = YES;
@@ -817,7 +821,7 @@ static void fakeNotifications() {
         }
     }
 
-    if (showButtons) {
+    if (showButtons > 0) {
         [self.view bringSubviewToFront:self.sxiClearAllButton];
         [self.view bringSubviewToFront:self.sxiCollapseButton];
     }
@@ -841,7 +845,7 @@ static void fakeNotifications() {
     self.sxiNotificationCount.hidden = YES;
     self.sxiNotificationCount.alpha = 0.0;
 
-    if (showButtons) {
+    if (showButtons > 0) {
         self.sxiClearAllButton.frame = [self sxiGetClearAllButtonFrame];
         self.sxiCollapseButton.frame = [self sxiGetCollapseButtonFrame];
 
@@ -863,9 +867,11 @@ static void fakeNotifications() {
             } else {
                 self.sxiNotificationCount.text = [NSString stringWithFormat:[translationDict objectForKey:kMoreNotifs], count];
             }
-        } else if (showButtons) {
-            ((UILabel*)[[lv _headerContentView] _dateLabel]).hidden = YES;
-            ((UILabel*)[[lv _headerContentView] _dateLabel]).alpha = 0.0;
+        } else if (showButtons > 0) {
+            if (showButtons == 1) {
+                ((UILabel*)[[lv _headerContentView] _dateLabel]).hidden = YES;
+                ((UILabel*)[[lv _headerContentView] _dateLabel]).alpha = 0.0;
+            }
 
             self.sxiClearAllButton.hidden = NO;
             self.sxiClearAllButton.alpha = 1.0;
@@ -1000,6 +1006,20 @@ static void fakeNotifications() {
             if (!frameFound) {
                 frameFound = true;
                 frame = cell.frame;
+                if (showButtons == 2) {
+                    NCNotificationShortLookViewController *controller = (NCNotificationShortLookViewController *)cell.contentViewController;
+
+                    if (controller.notificationRequest.sxiIsStack && controller.notificationRequest.sxiIsExpanded) {
+                        CGRect svFrame = controller.scrollView.frame;
+                        CGRect cvFrame = controller.view.frame;
+
+                        [UIView animateWithDuration:TEMPDURATION animations:^{
+                            controller.view.frame = CGRectMake(cvFrame.origin.x, cvFrame.origin.y, cvFrame.size.width, cvFrame.size.height + 40);
+                            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y + 40, svFrame.size.width, svFrame.size.height);
+                        }];
+                    }
+                }
+
                 continue;
             }
 
@@ -1007,9 +1027,15 @@ static void fakeNotifications() {
 
             CGRect properFrame = cell.frame;
             cell.frame = frame;
-            [UIView animateWithDuration:TEMPDURATION animations:^{
-                cell.frame = properFrame;
-            }];
+            if (showButtons == 2) {
+                [UIView animateWithDuration:TEMPDURATION animations:^{
+                    cell.frame = CGRectMake(properFrame.origin.x, properFrame.origin.y + 40, properFrame.size.width, properFrame.size.height);
+                }];
+            } else {
+                [UIView animateWithDuration:TEMPDURATION animations:^{
+                    cell.frame = properFrame;
+                }];
+            }
         }
     }
 }
@@ -1027,6 +1053,21 @@ static void fakeNotifications() {
             if (!frameFound) {
                 frameFound = true;
                 frame = cell.frame;
+
+                if (showButtons == 2) {
+                    NCNotificationShortLookViewController *controller = (NCNotificationShortLookViewController *)cell.contentViewController;
+
+                    if (controller.notificationRequest.sxiIsStack && !controller.notificationRequest.sxiIsExpanded) {
+                        CGRect svFrame = controller.scrollView.frame;
+                        CGRect cvFrame = controller.view.frame;
+
+                        [UIView animateWithDuration:TEMPDURATION animations:^{
+                            controller.view.frame = CGRectMake(cvFrame.origin.x, cvFrame.origin.y, cvFrame.size.width, cvFrame.size.height - 40);
+                            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - 40, svFrame.size.width, svFrame.size.height);
+                        }];
+                    }
+                }
+
                 continue;
             }
 
@@ -1091,7 +1132,7 @@ static void displayStatusChanged(CFNotificationCenterRef center, void *observer,
 %ctor{
     HBPreferences *file = [[HBPreferences alloc] initWithIdentifier:@"io.ominousness.stackxi"];
     bool enabled = [([file objectForKey:@"Enabled"] ?: @(YES)) boolValue];
-    showButtons = [([file objectForKey:@"ShowButtons"] ?: @(NO)) boolValue];
+    showButtons = [([file objectForKey:@"ShowButtons"] ?: @(2)) intValue];
     useIcons = [([file objectForKey:@"UseIcons"] ?: @(NO)) boolValue];
     bool debug = false;
     #ifdef DEBUG

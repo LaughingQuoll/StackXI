@@ -660,7 +660,8 @@
 
 @interface NCNotificationViewController : UIViewController 
 
-@property (nonatomic,retain) NCNotificationRequest* notificationRequest;          
+@property (nonatomic,retain) NCNotificationRequest* notificationRequest;
+@property (getter=_scrollView,nonatomic,readonly) UIScrollView * scrollView;
 
 @end
 
