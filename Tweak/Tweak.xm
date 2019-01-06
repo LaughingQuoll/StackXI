@@ -8,7 +8,7 @@
 #define ICON_CLEAR_ALL_PATH @"/Library/PreferenceBundles/StackXIPrefs.bundle/SXIClearAll.png"
 #define LANG_BUNDLE_PATH @"/Library/PreferenceBundles/StackXIPrefs.bundle/StackXILocalization.bundle"
 #define TEMPWIDTH 0
-#define TEMPDURATION 0.4
+#define TEMPDURATION 0.3
 #define CLEAR_DURATION 0.2
 #define MAX_SHOW_BEHIND 3 //amount of blank notifications to show behind each stack
 
@@ -1073,7 +1073,9 @@ static void fakeNotifications() {
             if (!frameFound) {
                 frameFound = true;
                 frame = cell.frame;
+
                 if (showButtons == 2) {
+                    frame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y + offset, cell.frame.size.width, cell.frame.size.height);
                     NCNotificationShortLookViewController *controller = (NCNotificationShortLookViewController *)cell.contentViewController;
 
                     if (controller.notificationRequest.sxiIsStack && controller.notificationRequest.sxiIsExpanded && !cell.sxiReturnSVToOrigFrame) {
@@ -1137,9 +1139,15 @@ static void fakeNotifications() {
                 continue;
             }
 
-            [UIView animateWithDuration:TEMPDURATION animations:^{
-                cell.frame = frame;
-            }];
+            if (cell.contentViewController.notificationRequest.sxiPositionInStack > MAX_SHOW_BEHIND) {
+                [UIView animateWithDuration:TEMPDURATION animations:^{
+                    cell.alpha = 0.0;
+                }];
+            } else {
+                [UIView animateWithDuration:TEMPDURATION animations:^{
+                    cell.frame = CGRectMake(frame.origin.x + (10 * cell.contentViewController.notificationRequest.sxiPositionInStack), frame.origin.y + 50 + (15 * cell.contentViewController.notificationRequest.sxiPositionInStack), frame.size.width - (20 * cell.contentViewController.notificationRequest.sxiPositionInStack), 50);
+                }];
+            }
         }
     }
 }
