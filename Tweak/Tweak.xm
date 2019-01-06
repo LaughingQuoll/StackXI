@@ -696,6 +696,7 @@ static void fakeNotifications() {
 %hook NCNotificationShortLookViewController
 
 %property (retain) UILabel* sxiNotificationCount;
+%property (retain) UILabel* sxiTitle;
 %property (retain) UIButton* sxiClearAllButton;
 %property (retain) UIButton* sxiCollapseButton;
 %property (assign,nonatomic) BOOL sxiIsLTR;
@@ -749,6 +750,15 @@ static void fakeNotifications() {
 %new
 -(CGRect)sxiGetNotificationCountFrame {
     return CGRectMake(self.view.frame.origin.x + 11, self.view.frame.origin.y + self.view.frame.size.height - 30, self.view.frame.size.width - 21, 25);
+}
+
+%new
+-(CGRect)sxiGetTitleFrame {
+    if (self.sxiIsLTR) {
+        return CGRectMake(self.view.frame.origin.x + buttonSpacing, self.view.frame.origin.y, self.view.frame.size.width - (buttonSpacing*3) - (buttonWidth*2), buttonHeight + buttonSpacing*2);
+    } else {
+        return CGRectMake(self.view.frame.origin.x - (buttonSpacing*2) - (buttonWidth*2), self.view.frame.origin.y, self.view.frame.size.width + (buttonSpacing*3) + (buttonWidth*2), buttonHeight + buttonSpacing*2);
+    }
 }
 
 %new
@@ -831,16 +841,32 @@ static void fakeNotifications() {
 
             [self.view addSubview:self.sxiClearAllButton];
             [self.view addSubview:self.sxiCollapseButton];
+
+            if (showButtons == 2) {
+                self.sxiTitle = [[UILabel alloc] initWithFrame:[self sxiGetTitleFrame]];
+                [self.sxiTitle setFont:[UIFont systemFontOfSize:buttonHeight]];
+                self.sxiTitle.numberOfLines = 1;
+                self.sxiTitle.clipsToBounds = YES;
+                self.sxiTitle.hidden = YES;
+                self.sxiTitle.alpha = 0.0;
+                self.sxiTitle.textColor = [[UIColor whiteColor] colorWithAlphaComponent:0.8];
+                [self.view addSubview:self.sxiTitle];
+            }
         }
     }
 
     if (showButtons > 0) {
         [self.view bringSubviewToFront:self.sxiClearAllButton];
         [self.view bringSubviewToFront:self.sxiCollapseButton];
+
+        if (showButtons == 2) {
+            [self.view bringSubviewToFront:self.sxiTitle];
+        }
     }
 
     if (lv && [lv _notificationContentView] && [lv _notificationContentView].primaryLabel && [lv _notificationContentView].primaryLabel.textColor) {
         self.sxiNotificationCount.textColor = [[lv _notificationContentView].primaryLabel.textColor colorWithAlphaComponent:0.8];
+        //if (self.sxiTitle) self.sxiTitle.textColor = [[lv _notificationContentView].primaryLabel.textColor colorWithAlphaComponent:0.9];
     }
 
     if (lv) {
@@ -867,6 +893,12 @@ static void fakeNotifications() {
 
         self.sxiCollapseButton.hidden = YES;
         self.sxiCollapseButton.alpha = 0.0;
+
+        if (showButtons == 2) {
+            self.sxiTitle.frame = [self sxiGetTitleFrame];
+            self.sxiTitle.hidden = YES;
+            self.sxiTitle.alpha = 0.0;
+        }
     }
 
     if ([NSStringFromClass([self.view.superview class]) isEqualToString:@"UIView"] && self.notificationRequest.sxiIsStack && [self.notificationRequest.sxiStackedNotificationRequests count] > 0) {
@@ -884,6 +916,12 @@ static void fakeNotifications() {
             if (showButtons == 1) {
                 ((UILabel*)[[lv _headerContentView] _dateLabel]).hidden = YES;
                 ((UILabel*)[[lv _headerContentView] _dateLabel]).alpha = 0.0;
+            }
+
+            if (showButtons == 2) {
+                self.sxiTitle.text = self.notificationRequest.content.header;
+                self.sxiTitle.hidden = NO;
+                self.sxiTitle.alpha = 1.0;
             }
 
             self.sxiClearAllButton.hidden = NO;

@@ -625,6 +625,17 @@
 @property (nonatomic,readonly) BOOL revealsAdditionalContentIfNoDefaultAction;              //@synthesize revealsAdditionalContentIfNoDefaultAction=_revealsAdditionalContentIfNoDefaultAction - In the implementation block
 @end
 
+@interface NCNotificationContent : NSObject
+
+@property (nonatomic,copy,readonly) NSString * header;                                     //@synthesize header=_header - In the implementation block
+@property (nonatomic,copy,readonly) NSString * title;                                      //@synthesize title=_title - In the implementation block
+@property (nonatomic,copy,readonly) NSString * subtitle;                                   //@synthesize subtitle=_subtitle - In the implementation block
+@property (nonatomic,copy,readonly) NSString * message;                                    //@synthesize message=_message - In the implementation block
+@property (nonatomic,copy,readonly) NSString * hiddenPreviewsBodyPlaceholder;              //@synthesize hiddenPreviewsBodyPlaceholder=_hiddenPreviewsBodyPlaceholder - In the implementation block
+@property (nonatomic,copy,readonly) NSString * topic;                                      //@synthesize topic=_topic - In the implementation block
+
+@end
+
 @interface NCNotificationRequest : NSObject
 
 @property (nonatomic,copy,readonly) NSSet* requestDestinations;
@@ -638,6 +649,7 @@
 @property (nonatomic,readonly) NCNotificationAction* clearAction;
 @property (nonatomic,readonly) NSDate* timestamp;
 @property (nonatomic,readonly) NCNotificationOptions* options; 
+@property (nonatomic,readonly) NCNotificationContent* content;
 
 
 -(void)sxiInsertRequest:(NCNotificationRequest *)request;
@@ -675,6 +687,7 @@
 
 @interface NCNotificationShortLookViewController : NCNotificationViewController
 @property (nonatomic, retain) UILabel* sxiNotificationCount;
+@property (nonatomic, retain) UILabel* sxiTitle;
 @property (nonatomic, retain) UIButton* sxiClearAllButton;
 @property (nonatomic, retain) UIButton* sxiCollapseButton;
 @property (assign,nonatomic) bool sxiIsLTR;
@@ -690,6 +703,7 @@
 -(CGRect)sxiGetClearAllButtonFrame;
 -(CGRect)sxiGetCollapseButtonFrame;
 -(CGRect)sxiGetNotificationCountFrame;
+-(CGRect)sxiGetTitleFrame;
 -(int)sxiButtonWidth;
 -(int)sxiButtonSpacing;
 
