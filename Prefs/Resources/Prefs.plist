@@ -72,6 +72,20 @@
 			<key>alternateColors</key>
 			<true/>
 		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>default</key>
+			<string>Default</string>
+			<key>defaults</key>
+			<string>io.ominousness.stackxi</string>
+			<key>label</key>
+			<string>ICON_THEME</string>
+			<key>key</key>
+			<string>IconTheme</string>
+			<key>detail</key>
+			<string>SXIIconThemesListController</string>
+		</dict>
 
 		<!-- Credits -->
 		<dict>

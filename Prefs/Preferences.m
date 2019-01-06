@@ -43,4 +43,10 @@
     const char* args[] = {"killall", "backboardd", NULL};
     posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
 }
+
+- (void)setThemeName:(NSString *)name {
+    UITableViewCell *cell = [self.table cellForRowAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:1]];
+	cell.detailTextLabel.text = name;
+}
+
 @end

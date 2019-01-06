@@ -8,4 +8,5 @@
 @interface SXIPrefsListController : HBRootListController
     - (void)resetPrefs:(id)sender;
     - (void)respring:(id)sender;
+    - (void)setThemeName:(NSString *)name;
 @end
