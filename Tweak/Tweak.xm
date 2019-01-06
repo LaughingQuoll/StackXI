@@ -767,7 +767,7 @@ static void fakeNotifications() {
     if (self.sxiIsLTR) {
         return CGRectMake(self.view.frame.origin.x + buttonSpacing*2, self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - (buttonSpacing*4) - (buttonWidth*2), buttonHeight - buttonSpacing/2.0);
     } else {
-        return CGRectMake(self.view.frame.origin.x + (buttonSpacing*4) + (buttonWidth*2), self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - buttonSpacing*2, buttonHeight - buttonSpacing/2.0);
+        return CGRectMake(self.view.frame.origin.x + (buttonSpacing*4) + (buttonWidth*2), self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - (buttonSpacing*6) - (buttonWidth*2), buttonHeight - buttonSpacing/2.0);
     }
 }
 
