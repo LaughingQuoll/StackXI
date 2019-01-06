@@ -25,6 +25,9 @@ static bool useIcons = false;
 static bool canUpdate = true;
 static bool isOnLockscreen = true;
 static int showButtons = 2; // 0 - StackXI default; 1 - iOS 12
+static int buttonWidth = 75;
+static int buttonHeight = 25;
+static int buttonSpacing = 5;
 static NSDictionary<NSString*, NSString*> *translationDict;
 
 UIImage * imageWithView(UIView *view) {
@@ -561,9 +564,15 @@ static void fakeNotifications() {
                 return CGSizeMake(orig.width,1);
             }
         }
+        if (request.sxiIsStack) {
+            if (!request.sxiIsExpanded && [request.sxiStackedNotificationRequests count] > 0) {
+                return CGSizeMake(orig.width,orig.height + 15);
+            }
 
-        if (request.sxiIsStack && !request.sxiIsExpanded && [request.sxiStackedNotificationRequests count] > 0) {
-            return CGSizeMake(orig.width,orig.height + 15);
+            if (request.sxiIsExpanded && showButtons == 2) {
+                int offset = buttonHeight + buttonSpacing*3;
+                return CGSizeMake(orig.width,orig.height + offset);
+            }
         }
     }
     return orig;
@@ -669,8 +678,6 @@ static void fakeNotifications() {
 %property (retain) UIButton* sxiClearAllButton;
 %property (retain) UIButton* sxiCollapseButton;
 %property (assign,nonatomic) BOOL sxiIsLTR;
-%property (assign,nonatomic) CGRect sxiOrigSVFrame;
-%property (assign,nonatomic) CGRect sxiOrigCVFrame;
 
 -(void)viewWillAppear:(bool)whatever {
     %orig;
@@ -701,35 +708,20 @@ static void fakeNotifications() {
 }
 
 %new
--(int)sxiButtonWidth {
-    if (useIcons) return 45;
-    return 75;
-}
-
-%new
--(int)sxiButtonSpacing {
-    return 5;
-}
-
-%new
 -(CGRect)sxiGetClearAllButtonFrame {
-    int width = [self sxiButtonWidth];
-    int spacing = [self sxiButtonSpacing];
     if (self.sxiIsLTR) {
-        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - (2*spacing) - (2*width), self.view.frame.origin.y + spacing, width, 25);
+        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - (2*buttonSpacing) - (2*buttonWidth), self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
     } else {
-        return CGRectMake(self.view.frame.origin.x + spacing, self.view.frame.origin.y + spacing, width, 25);
+        return CGRectMake(self.view.frame.origin.x + buttonSpacing, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
     }
 }
 
 %new
 -(CGRect)sxiGetCollapseButtonFrame {
-    int width = [self sxiButtonWidth];
-    int spacing = [self sxiButtonSpacing];
     if (self.sxiIsLTR) {
-        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - spacing - width, self.view.frame.origin.y + spacing, width, 25);
+        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - buttonSpacing - buttonWidth, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
     } else {
-        return CGRectMake(self.view.frame.origin.x + (2*spacing) + width, self.view.frame.origin.y + spacing, width, 25);
+        return CGRectMake(self.view.frame.origin.x + (2*buttonSpacing) + buttonWidth, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
     }
 }
 
@@ -997,6 +989,7 @@ static void fakeNotifications() {
 
     CGRect frame = CGRectMake(0,0,0,0);
     bool frameFound = false;
+    int offset = buttonHeight + buttonSpacing*3;
     for (NSInteger row = 0; row < [self numberOfItemsInSection:0]; row++) {
         id c = [self _visibleCellForIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
         if (!c) continue;
@@ -1011,11 +1004,9 @@ static void fakeNotifications() {
 
                     if (controller.notificationRequest.sxiIsStack && controller.notificationRequest.sxiIsExpanded) {
                         CGRect svFrame = controller.scrollView.frame;
-                        CGRect cvFrame = controller.view.frame;
 
                         [UIView animateWithDuration:TEMPDURATION animations:^{
-                            controller.view.frame = CGRectMake(cvFrame.origin.x, cvFrame.origin.y, cvFrame.size.width, cvFrame.size.height + 40);
-                            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y + 40, svFrame.size.width, svFrame.size.height);
+                            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y + offset, svFrame.size.width, svFrame.size.height - offset);
                         }];
                     }
                 }
@@ -1027,15 +1018,9 @@ static void fakeNotifications() {
 
             CGRect properFrame = cell.frame;
             cell.frame = frame;
-            if (showButtons == 2) {
-                [UIView animateWithDuration:TEMPDURATION animations:^{
-                    cell.frame = CGRectMake(properFrame.origin.x, properFrame.origin.y + 40, properFrame.size.width, properFrame.size.height);
-                }];
-            } else {
-                [UIView animateWithDuration:TEMPDURATION animations:^{
-                    cell.frame = properFrame;
-                }];
-            }
+            [UIView animateWithDuration:TEMPDURATION animations:^{
+                cell.frame = properFrame;
+            }];
         }
     }
 }
@@ -1044,6 +1029,7 @@ static void fakeNotifications() {
 -(void)sxiCollapse:(NSString *)sectionID {
     CGRect frame = CGRectMake(0,0,0,0);
     bool frameFound = false;
+    int offset = buttonHeight + buttonSpacing*3;
     for (NSInteger row = 0; row < [self numberOfItemsInSection:0]; row++) {
         id c = [self _visibleCellForIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
         if (!c) continue;
@@ -1059,11 +1045,9 @@ static void fakeNotifications() {
 
                     if (controller.notificationRequest.sxiIsStack && !controller.notificationRequest.sxiIsExpanded) {
                         CGRect svFrame = controller.scrollView.frame;
-                        CGRect cvFrame = controller.view.frame;
 
                         [UIView animateWithDuration:TEMPDURATION animations:^{
-                            controller.view.frame = CGRectMake(cvFrame.origin.x, cvFrame.origin.y, cvFrame.size.width, cvFrame.size.height - 40);
-                            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - 40, svFrame.size.width, svFrame.size.height);
+                            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - offset, svFrame.size.width, svFrame.size.height);
                         }];
                     }
                 }
@@ -1134,6 +1118,15 @@ static void displayStatusChanged(CFNotificationCenterRef center, void *observer,
     bool enabled = [([file objectForKey:@"Enabled"] ?: @(YES)) boolValue];
     showButtons = [([file objectForKey:@"ShowButtons"] ?: @(2)) intValue];
     useIcons = [([file objectForKey:@"UseIcons"] ?: @(NO)) boolValue];
+
+    if (useIcons) {
+        buttonWidth = 45;
+    }
+
+    if (showButtons == 2) {
+        buttonHeight = 30;
+    }
+
     bool debug = false;
     #ifdef DEBUG
     debug = true;
