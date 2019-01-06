@@ -28,6 +28,7 @@ static int showButtons = 2; // 0 - StackXI default; 1 - iOS 12
 static int buttonWidth = 75;
 static int buttonHeight = 25;
 static int buttonSpacing = 5;
+static int moreLabelHeight = 15;
 static NSDictionary<NSString*, NSString*> *translationDict;
 
 UIImage * imageWithView(UIView *view) {
@@ -573,7 +574,7 @@ static void fakeNotifications() {
         }
         if (request.sxiIsStack) {
             if (!request.sxiIsExpanded && [request.sxiStackedNotificationRequests count] > 0) {
-                return CGSizeMake(orig.width,orig.height + 15);
+                return CGSizeMake(orig.width,orig.height + moreLabelHeight);
             }
 
             if (request.sxiIsExpanded && showButtons == 2) {
@@ -756,7 +757,7 @@ static void fakeNotifications() {
 
 %new
 -(CGRect)sxiGetNotificationCountFrame {
-    return CGRectMake(self.view.frame.origin.x + 11, self.view.frame.origin.y + self.view.frame.size.height - 30, self.view.frame.size.width - 21, 25);
+    return CGRectMake(self.view.frame.origin.x + 11, self.view.frame.origin.y + self.view.frame.size.height - 30, self.view.frame.size.width - 21, moreLabelHeight + 2*buttonSpacing);
 }
 
 %new
@@ -1122,8 +1123,13 @@ static void fakeNotifications() {
                         CGRect svFrame = controller.scrollView.frame;
                         cell.sxiReturnSVToOrigFrame = false;
 
+                        CGRect ncFrame = controller.sxiNotificationCount.frame;
+                        controller.sxiNotificationCount.frame = CGRectMake(ncFrame.origin.x, ncFrame.origin.y + offset, ncFrame.size.width, ncFrame.size.height);
+
                         [UIView animateWithDuration:TEMPDURATION animations:^{
                             controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - offset, svFrame.size.width, svFrame.size.height + offset);
+                            cell.frame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y, cell.frame.size.width, cell.frame.size.height - offset + moreLabelHeight);
+                            controller.sxiNotificationCount.frame = ncFrame;
                         }];
                     }
                 }
