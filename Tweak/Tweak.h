@@ -658,10 +658,17 @@
 
 @end
 
+@interface _NCNotificationViewControllerView : UIView
+
+@property (nonatomic, retain) NCNotificationShortLookView *contentView;
+
+@end
+
 @interface NCNotificationViewController : UIViewController 
 
 @property (nonatomic,retain) NCNotificationRequest* notificationRequest;
 @property (getter=_scrollView,nonatomic,readonly) UIScrollView * scrollView;
+-(UIView*)_lookView;
 
 @end
 
@@ -772,6 +779,8 @@
 
 @property (nonatomic,retain) NCNotificationViewController* contentViewController;  
 @property (nonatomic,retain) NCNotificationListCellActionButtonsView* rightActionButtonsView;
+@property (assign,nonatomic) bool sxiReturnSVToOrigFrame;
+@property (assign,nonatomic) CGRect sxiSVOrigFrame;
 
 -(instancetype)init;
 -(id)initWithFrame:(CGRect)arg1 ;

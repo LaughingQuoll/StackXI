@@ -599,6 +599,8 @@ static void fakeNotifications() {
 
 %hook NCNotificationListCell
 
+%property (nonatomic,assign) BOOL sxiReturnSVToOrigFrame;
+%property (nonatomic,assign) CGRect sxiSVOrigFrame;
 
 -(void)layoutSubviews {
     /*//NSLog(@"[StackXI] SUBVIEWS!!!!");
@@ -610,7 +612,26 @@ static void fakeNotifications() {
         [self.rightActionButtonsView.defaultActionButton setTitle: @"Clear"];
         [self.rightActionButtonsView.defaultActionButton.titleLabel setText: @"Clear"];
     }*/
+
+    int offset = buttonHeight + buttonSpacing*3;
+    if (showButtons == 2) {
+        NCNotificationShortLookViewController *controller = (NCNotificationShortLookViewController *)self.contentViewController;
+
+        CGRect svFrame = controller.scrollView.frame;
+        if (self.sxiReturnSVToOrigFrame && !controller.notificationRequest.sxiIsExpanded) {
+            self.sxiReturnSVToOrigFrame = false;
+            self.sxiSVOrigFrame = controller.scrollView.frame;
+            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - offset, svFrame.size.width, svFrame.size.height + offset);
+        }
+
+        if (!self.sxiReturnSVToOrigFrame && controller.notificationRequest.sxiIsExpanded) {
+            self.sxiReturnSVToOrigFrame = true;
+            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y + offset, svFrame.size.width, svFrame.size.height - offset);
+        }
+    }
+
     %orig;
+
     if (!self.contentViewController.notificationRequest.sxiIsStack) {
         [listCollectionView sendSubviewToBack:self];
     }
@@ -1002,8 +1023,10 @@ static void fakeNotifications() {
                 if (showButtons == 2) {
                     NCNotificationShortLookViewController *controller = (NCNotificationShortLookViewController *)cell.contentViewController;
 
-                    if (controller.notificationRequest.sxiIsStack && controller.notificationRequest.sxiIsExpanded) {
+                    if (controller.notificationRequest.sxiIsStack && controller.notificationRequest.sxiIsExpanded && !cell.sxiReturnSVToOrigFrame) {
                         CGRect svFrame = controller.scrollView.frame;
+                        cell.sxiReturnSVToOrigFrame = true;
+                        cell.sxiSVOrigFrame = svFrame;
 
                         [UIView animateWithDuration:TEMPDURATION animations:^{
                             controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y + offset, svFrame.size.width, svFrame.size.height - offset);
@@ -1043,11 +1066,12 @@ static void fakeNotifications() {
                 if (showButtons == 2) {
                     NCNotificationShortLookViewController *controller = (NCNotificationShortLookViewController *)cell.contentViewController;
 
-                    if (controller.notificationRequest.sxiIsStack && !controller.notificationRequest.sxiIsExpanded) {
+                    if (controller.notificationRequest.sxiIsStack && !controller.notificationRequest.sxiIsExpanded && cell.sxiReturnSVToOrigFrame) {
                         CGRect svFrame = controller.scrollView.frame;
+                        cell.sxiReturnSVToOrigFrame = false;
 
                         [UIView animateWithDuration:TEMPDURATION animations:^{
-                            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - offset, svFrame.size.width, svFrame.size.height);
+                            controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - offset, svFrame.size.width, svFrame.size.height + offset);
                         }];
                     }
                 }
