@@ -45,9 +45,16 @@ UIImage * imageWithView(UIView *view) {
 @implementation UIButton(Blur)
 
 - (void)addBlurEffect {
-    UIVisualEffectView *blur = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+    UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    UIVisualEffectView *blur = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
     blur.frame = self.bounds;
     blur.userInteractionEnabled = false;
+
+    UIVisualEffectView *vibrancy = [[UIVisualEffectView alloc] initWithEffect:[UIVibrancyEffect effectForBlurEffect:blurEffect]];
+    vibrancy.frame = self.bounds;
+    vibrancy.userInteractionEnabled = false;
+
+    [[blur contentView] addSubview:vibrancy];
     [self insertSubview:blur atIndex:0];
     if (UIImageView *imageView = self.imageView) {
         [self bringSubviewToFront:imageView];
@@ -835,13 +842,15 @@ static void fakeNotifications() {
 
                 self.sxiCollapseButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
                 [self.sxiCollapseButton setTitle:NULL forState:UIControlStateNormal];
-                UIImage *btnCollapseImage = [UIImage imageWithContentsOfFile:ICON_COLLAPSE_PATH];
+                UIImage *btnCollapseImage = [[UIImage imageWithContentsOfFile:ICON_COLLAPSE_PATH] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 [self.sxiCollapseButton setImage:btnCollapseImage forState:UIControlStateNormal];
+                self.sxiCollapseButton.tintColor = [UIColor blackColor];
 
                 self.sxiClearAllButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
                 [self.sxiClearAllButton setTitle:NULL forState:UIControlStateNormal];
-                UIImage *btnClearAllImage = [UIImage imageWithContentsOfFile:ICON_CLEAR_ALL_PATH];
+                UIImage *btnClearAllImage = [[UIImage imageWithContentsOfFile:ICON_CLEAR_ALL_PATH] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
                 [self.sxiClearAllButton setImage:btnClearAllImage forState:UIControlStateNormal];
+                self.sxiClearAllButton.tintColor = [UIColor blackColor];
             }
 
             [self.view addSubview:self.sxiClearAllButton];
