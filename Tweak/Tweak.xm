@@ -266,13 +266,13 @@ static void fakeNotifications() {
 
 %hook NCNotificationPriorityList
 
-%property (nonatomic,retain) NSMutableOrderedSet* allRequests;
+%property (nonatomic,retain) NSMutableOrderedSet* sxiAllRequests;
 
 -(id)init {
     NSLog(@"[StackXI] Init!");
     id orig = %orig;
     priorityList = self;
-    self.allRequests = [[NSMutableOrderedSet alloc] initWithCapacity:1000];
+    self.sxiAllRequests = [[NSMutableOrderedSet alloc] initWithCapacity:1000];
     return orig;
 }
 
@@ -283,8 +283,8 @@ static void fakeNotifications() {
 
     NSMutableDictionary* stacks = [[NSMutableDictionary alloc] initWithCapacity:1000];
 
-    for (int i = 0; i < [self.allRequests count]; i++) {
-        NCNotificationRequest *req = self.allRequests[i];
+    for (int i = 0; i < [self.sxiAllRequests count]; i++) {
+        NCNotificationRequest *req = self.sxiAllRequests[i];
         if (req.bulletin && req.bulletin.sectionID && req.timestamp && req.options && req.options.lockScreenPriority) {
             if (stacks[req.bulletin.sectionID]) {
                 if ([req.timestamp compare:stacks[req.bulletin.sectionID][@"timestamp"]] == NSOrderedDescending) {
@@ -308,7 +308,7 @@ static void fakeNotifications() {
         }
     }
 
-    [self.allRequests sortUsingComparator:(NSComparator)^(id obj1, id obj2){
+    [self.sxiAllRequests sortUsingComparator:(NSComparator)^(id obj1, id obj2){
         NCNotificationRequest *a = (NCNotificationRequest *)obj1;
         NCNotificationRequest *b = (NCNotificationRequest *)obj2;
 
@@ -328,8 +328,8 @@ static void fakeNotifications() {
 
     NSString *expandedSection = nil;
 
-    for (int i = 0; i < [self.allRequests count]; i++) {
-        NCNotificationRequest *req = self.allRequests[i];
+    for (int i = 0; i < [self.sxiAllRequests count]; i++) {
+        NCNotificationRequest *req = self.sxiAllRequests[i];
         if (req.bulletin.sectionID && req.sxiIsExpanded && req.sxiIsStack) {
             expandedSection = req.bulletin.sectionID;
             break;
@@ -340,8 +340,8 @@ static void fakeNotifications() {
     NCNotificationRequest *lastStack = nil;
     NSUInteger sxiPositionInStack = 0;
 
-    for (int i = 0; i < [self.allRequests count]; i++) {
-        NCNotificationRequest *req = self.allRequests[i];
+    for (int i = 0; i < [self.sxiAllRequests count]; i++) {
+        NCNotificationRequest *req = self.sxiAllRequests[i];
         bool shouldBelongOnLockscreen = [req.requestDestinations containsObject:@"BulletinDestinationLockScreen"];
         if (isOnLockscreen && !shouldBelongOnLockscreen) {
             continue;
@@ -397,11 +397,11 @@ static void fakeNotifications() {
     if (!request || !request.notificationIdentifier) return 0;
     bool found = false;
 
-    for (int i = 0; i < [self.allRequests count]; i++) {
-        NCNotificationRequest *req = self.allRequests[i];
+    for (int i = 0; i < [self.sxiAllRequests count]; i++) {
+        NCNotificationRequest *req = self.sxiAllRequests[i];
         if ([req.notificationIdentifier isEqualToString:request.notificationIdentifier]) {
             found = true;
-            [self.allRequests replaceObjectAtIndex:(NSUInteger)i withObject:request];
+            [self.sxiAllRequests replaceObjectAtIndex:(NSUInteger)i withObject:request];
             break;
         }
     }
@@ -409,7 +409,7 @@ static void fakeNotifications() {
     if (!found) {
         %orig;
         request.sxiVisible = true;
-        [self.allRequests addObject:request];
+        [self.sxiAllRequests addObject:request];
         [listCollectionView reloadData];
     }
     return 0;
@@ -419,15 +419,15 @@ static void fakeNotifications() {
     if (!request) return 0;
 
     if (request.notificationIdentifier) {
-        for (int i = 0; i < [self.allRequests count]; i++) {
-            NCNotificationRequest *req = self.allRequests[i];
+        for (int i = 0; i < [self.sxiAllRequests count]; i++) {
+            NCNotificationRequest *req = self.sxiAllRequests[i];
             if ([req.notificationIdentifier isEqualToString:request.notificationIdentifier]) {
-                [self.allRequests removeObjectAtIndex:i];
+                [self.sxiAllRequests removeObjectAtIndex:i];
             }
         }
     }
 
-    [self.allRequests removeObject:request];
+    [self.sxiAllRequests removeObject:request];
     [listCollectionView reloadData];
     return 0;
 }
@@ -454,8 +454,8 @@ static void fakeNotifications() {
 %new
 -(void)sxiClearAll {
     canUpdate = false;
-    [dispatcher destination:nil requestsClearingNotificationRequests:[self.allRequests array]];
-    [self.allRequests removeAllObjects];
+    [dispatcher destination:nil requestsClearingNotificationRequests:[self.sxiAllRequests array]];
+    [self.sxiAllRequests removeAllObjects];
     [listCollectionView sxiClearAll];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, CLEAR_DURATION * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         canUpdate = true;
