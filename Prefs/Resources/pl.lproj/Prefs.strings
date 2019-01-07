@@ -12,4 +12,7 @@
   "SUPPORT_ME" = "Wspomóź mnie!";
   "OFF" = "Wyłączone";
   "ICON_THEME" = "Styl ikon";
+  "GROUP_BY" = "Grupuj powiadomienia";
+  "GROUP_BY_APP" = "Aplikacja";
+  "GROUP_BY_THREAD" = "Wątek";
 }

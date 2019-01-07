@@ -6,6 +6,12 @@
 #import <BulletinBoard/BBBulletin.h>
 #import <BulletinBoard/BBAction.h>
 
+@interface BBBulletin(StackXI)
+
+@property (nonatomic,copy) NSString * threadID;        
+
+@end
+
 @interface _UIBackdropView : UIView {
 	int  _style;
 }
@@ -641,6 +647,7 @@
 @property (nonatomic,copy,readonly) NSSet* requestDestinations;
 @property (nonatomic,copy,readonly) BBBulletin* bulletin;
 @property (nonatomic,copy,readonly) NSString* notificationIdentifier;
+@property (nonatomic,copy,readonly) NSString *threadIdentifier;
 @property (assign,nonatomic) bool sxiIsStack;
 @property (assign,nonatomic) bool sxiIsExpanded;
 @property (assign,nonatomic) bool sxiVisible;
@@ -651,7 +658,7 @@
 @property (nonatomic,readonly) NCNotificationOptions* options; 
 @property (nonatomic,readonly) NCNotificationContent* content;
 
-
+-(NSString *)sxiStackID;
 -(void)sxiInsertRequest:(NCNotificationRequest *)request;
 -(void)sxiExpand;
 -(void)sxiCollapse;

@@ -29,9 +29,11 @@ static int buttonWidth = 75;
 static int buttonHeight = 25;
 static int buttonSpacing = 5;
 static int moreLabelHeight = 15;
+static int groupBy = 0;
 static NSDictionary<NSString*, NSString*> *translationDict;
 static NSString *iconCollapsePath;
 static NSString *iconClearAllPath;
+static NSArray *appsStackableByTitle = @[@"com.junecloud.Deliveries", @"com.google.hangouts", @"com.facebook.Messenger"]; //TODO: applist?
 
 UIImage * imageWithView(UIView *view) {
     UIGraphicsBeginImageContextWithOptions(view.bounds.size, view.opaque, 0.0);
@@ -66,7 +68,7 @@ UIImage * imageWithView(UIView *view) {
 
 @end
 
-static void fakeNotification(NSString *sectionID, NSDate *date, NSString *message) {
+static void fakeNotification(NSString *sectionID, NSDate *date, NSString *message, NSString *thread) {
     dispatch_sync(__BBServerQueue, ^{
         BBBulletin *bulletin = [[BBBulletin alloc] init];
 
@@ -75,6 +77,7 @@ static void fakeNotification(NSString *sectionID, NSDate *date, NSString *messag
         bulletin.sectionID = sectionID;
         bulletin.bulletinID = [[NSProcessInfo processInfo] globallyUniqueString];
         bulletin.recordID = [[NSProcessInfo processInfo] globallyUniqueString];
+        bulletin.threadID = NULL; //thread;
         bulletin.publisherBulletinID = [[NSProcessInfo processInfo] globallyUniqueString];
         bulletin.date = date;
         bulletin.defaultAction = [BBAction actionWithLaunchBundleID:sectionID callblock:nil];
@@ -84,21 +87,21 @@ static void fakeNotification(NSString *sectionID, NSDate *date, NSString *messag
 }
 
 static void fakeNotifications() {
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 1!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 2!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 3!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 4!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 5!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 6!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 7!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 8!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 9!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 10!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 11!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 12!");
-    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 13!");
-    fakeNotification(@"com.apple.Music", [NSDate date], @"Test notification 14!");
-    fakeNotification(@"com.apple.mobilephone", [NSDate date], @"Test notification 15!");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 1!", @"AAAAA-AAAAA");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 2!", @"AAAAA-AAAAA");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 3!", @"AAAAA-AAAAA");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 4!", @"AAAAA-AAAAB");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 5!", @"AAAAA-AAAAB");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 6!", @"AAAAA-AAAAA");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 7!", @"AAAAA-AAAAB");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 8!", @"AAAAA-AAAAA");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 9!", @"AAAAA-AAAAA");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 10!", @"AAAAA-AAAAB");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 11!", @"AAAAA-AAAAA");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 12!", @"AAAAA-AAAAA");
+    fakeNotification(@"com.apple.MobileSMS", [NSDate date], @"Test notification 13!", @"AAAAA-AAAAB");
+    fakeNotification(@"com.apple.Music", [NSDate date], @"Test notification 14!", NULL);
+    fakeNotification(@"com.apple.mobilephone", [NSDate date], @"Test notification 15!", NULL);
 }
 
 %group StackXIDebug
@@ -177,6 +180,23 @@ static void fakeNotifications() {
 }
 
 %new
+-(NSString *)sxiStackID {
+    if (groupBy == 1) {
+        if (![self.threadIdentifier hasPrefix:@"req-"]) {
+            return [NSString stringWithFormat:@"%@:%@", self.bulletin.sectionID, self.threadIdentifier];
+        } else {
+            if ([self.bulletin.title length] > 0 && [appsStackableByTitle containsObject:self.bulletin.sectionID]) {
+                return [NSString stringWithFormat:@"%@:%@", self.bulletin.sectionID, self.bulletin.title];
+            } else {
+                return self.bulletin.sectionID;
+            }
+        }
+    } else {
+        return self.bulletin.sectionID;
+    }
+}
+
+%new
 -(void)sxiExpand {
     if (self.sxiIsExpanded) return;
     self.sxiIsExpanded = true;
@@ -185,7 +205,7 @@ static void fakeNotifications() {
         request.sxiVisible = true;
     }
     
-    [listCollectionView sxiExpand:self.bulletin.sectionID];
+    [listCollectionView sxiExpand:[self sxiStackID]];
 }
 
 
@@ -198,7 +218,7 @@ static void fakeNotifications() {
         request.sxiVisible = false;
     }
     
-    [listCollectionView sxiCollapse:self.bulletin.sectionID];
+    [listCollectionView sxiCollapse:[self sxiStackID]];
 }
 
 %new
@@ -301,21 +321,22 @@ static void fakeNotifications() {
     for (int i = 0; i < [self.sxiAllRequests count]; i++) {
         NCNotificationRequest *req = self.sxiAllRequests[i];
         if (req.bulletin && req.bulletin.sectionID && req.timestamp && req.options && req.options.lockScreenPriority) {
-            if (stacks[req.bulletin.sectionID]) {
-                if ([req.timestamp compare:stacks[req.bulletin.sectionID][@"timestamp"]] == NSOrderedDescending) {
-                    stacks[req.bulletin.sectionID] = @{
+            NSString *stackID = [req sxiStackID];
+            if (stacks[stackID]) {
+                if ([req.timestamp compare:stacks[stackID][@"timestamp"]] == NSOrderedDescending) {
+                    stacks[stackID] = @{
                         @"timestamp" : req.timestamp,
-                        @"priority" : stacks[req.bulletin.sectionID][@"priority"]
+                        @"priority" : stacks[stackID][@"priority"]
                     };
                 }
-                if (req.options.lockScreenPriority > [stacks[req.bulletin.sectionID][@"priority"] longValue]) {
-                    stacks[req.bulletin.sectionID] = @{
-                        @"timestamp" : stacks[req.bulletin.sectionID][@"timestamp"],
+                if (req.options.lockScreenPriority > [stacks[stackID][@"priority"] longValue]) {
+                    stacks[stackID] = @{
+                        @"timestamp" : stacks[stackID][@"timestamp"],
                         @"priority" : @(req.options.lockScreenPriority)
                     };
                 }
             } else {
-                stacks[req.bulletin.sectionID] = @{
+                stacks[stackID] = @{
                     @"timestamp" : req.timestamp,
                     @"priority" : @(req.options.lockScreenPriority)
                 };
@@ -326,19 +347,21 @@ static void fakeNotifications() {
     [self.sxiAllRequests sortUsingComparator:(NSComparator)^(id obj1, id obj2){
         NCNotificationRequest *a = (NCNotificationRequest *)obj1;
         NCNotificationRequest *b = (NCNotificationRequest *)obj2;
+        NSString *stackIDa = [a sxiStackID];
+        NSString *stackIDb = [b sxiStackID];
 
-        if ([a.bulletin.sectionID isEqualToString:b.bulletin.sectionID]) {
+        if ([stackIDa isEqualToString:stackIDb]) {
             return [b.timestamp compare:a.timestamp] == NSOrderedDescending;
         }
 
-        if (b.bulletin.sectionID && a.bulletin.sectionID && stacks[b.bulletin.sectionID] && stacks[a.bulletin.sectionID]) {
-            if ([stacks[b.bulletin.sectionID][@"priority"] compare:stacks[a.bulletin.sectionID][@"priority"]] == NSOrderedSame) {
-                return [stacks[b.bulletin.sectionID][@"timestamp"] compare:stacks[a.bulletin.sectionID][@"timestamp"]] == NSOrderedDescending;
+        if (stackIDb && stackIDa && stacks[stackIDb] && stacks[stackIDa]) {
+            if ([stacks[stackIDb][@"priority"] compare:stacks[stackIDa][@"priority"]] == NSOrderedSame) {
+                return [stacks[stackIDb][@"timestamp"] compare:stacks[stackIDa][@"timestamp"]] == NSOrderedDescending;
             }
-            return [stacks[b.bulletin.sectionID][@"priority"] compare:stacks[a.bulletin.sectionID][@"priority"]] == NSOrderedDescending;
+            return [stacks[stackIDb][@"priority"] compare:stacks[stackIDa][@"priority"]] == NSOrderedDescending;
         }
 
-        return [a.bulletin.sectionID localizedStandardCompare:b.bulletin.sectionID] == NSOrderedAscending;
+        return [stackIDb localizedStandardCompare:stackIDb] == NSOrderedAscending;
     }];
 
     NSString *expandedSection = nil;
@@ -346,7 +369,7 @@ static void fakeNotifications() {
     for (int i = 0; i < [self.sxiAllRequests count]; i++) {
         NCNotificationRequest *req = self.sxiAllRequests[i];
         if (req.bulletin.sectionID && req.sxiIsExpanded && req.sxiIsStack) {
-            expandedSection = req.bulletin.sectionID;
+            expandedSection = [req sxiStackID];
             break;
         }
     }
@@ -363,25 +386,27 @@ static void fakeNotifications() {
         }
 
         if (req.bulletin.sectionID) {
+            NSString *stackID = [req sxiStackID];
+
             [req.sxiStackedNotificationRequests removeAllObjects];
             req.sxiIsStack = false;
             req.sxiVisible = false;
             req.sxiIsExpanded = false;
             req.sxiPositionInStack = ++sxiPositionInStack;
 
-            if ([expandedSection isEqualToString:req.bulletin.sectionID]) {
+            if ([expandedSection isEqualToString:stackID]) {
                 req.sxiVisible = true;
             }
 
-            if (!lastSection || ![lastSection isEqualToString:req.bulletin.sectionID]) {
-                lastSection = req.bulletin.sectionID;
+            if (!lastSection || ![lastSection isEqualToString:stackID]) {
+                lastSection = stackID;
                 lastStack = req;
 
                 req.sxiVisible = true;
                 req.sxiIsStack = true;
                 req.sxiPositionInStack = 0;
                 sxiPositionInStack = 0;
-                if ([expandedSection isEqualToString:req.bulletin.sectionID]) {
+                if ([expandedSection isEqualToString:stackID]) {
                     req.sxiIsExpanded = true;
                 }
 
@@ -390,11 +415,11 @@ static void fakeNotifications() {
                 continue;
             }
 
-            if (lastStack && [lastSection isEqualToString:req.bulletin.sectionID]) {
+            if (lastStack && [lastSection isEqualToString:stackID]) {
                 [lastStack sxiInsertRequest:req];
             }
             
-            if (req.sxiPositionInStack <= MAX_SHOW_BEHIND || [expandedSection isEqualToString:req.bulletin.sectionID]) {
+            if (req.sxiPositionInStack <= MAX_SHOW_BEHIND || [expandedSection isEqualToString:stackID]) {
                 [self.requests addObject:req];
             }
         } else {
@@ -1037,9 +1062,10 @@ static void fakeNotifications() {
     for (NCNotificationRequest *request in priorityList.requests) {
         if (!request.bulletin.sectionID) continue;
 
-        if (![sectionIDs containsObject:request.bulletin.sectionID] && request.sxiIsStack && request.sxiIsExpanded) {
+        NSString *stackID = [request sxiStackID];
+        if (![sectionIDs containsObject:stackID] && request.sxiIsStack && request.sxiIsExpanded) {
             [request sxiCollapse];
-            [sectionIDs addObject:request.bulletin.sectionID];
+            [sectionIDs addObject:stackID];
         }
     }
 
@@ -1055,9 +1081,10 @@ static void fakeNotifications() {
     for (NCNotificationRequest *request in priorityList.requests) {
         if (!request.bulletin.sectionID) continue;
 
-        if (![sectionIDs containsObject:request.bulletin.sectionID] && request.sxiIsStack && request.sxiIsExpanded) {	
+        NSString *stackID = [request sxiStackID];
+        if (![sectionIDs containsObject:stackID] && request.sxiIsStack && request.sxiIsExpanded) {	
             [request sxiCollapse];	
-            [sectionIDs addObject:request.bulletin.sectionID];	
+            [sectionIDs addObject:stackID];	
         }	
     }
 
@@ -1071,7 +1098,7 @@ static void fakeNotifications() {
         if (!c) continue;
 
         NCNotificationListCell* cell = (NCNotificationListCell*)c;
-        if ([sectionID isEqualToString:cell.contentViewController.notificationRequest.bulletin.sectionID]) {
+        if ([sectionID isEqualToString:[cell.contentViewController.notificationRequest sxiStackID]]) {
             if (!frameFound) {
                 frameFound = true;
                 frame = cell.frame;
@@ -1115,7 +1142,7 @@ static void fakeNotifications() {
         if (!c) continue;
 
         NCNotificationListCell* cell = (NCNotificationListCell*)c;
-        if ([sectionID isEqualToString:cell.contentViewController.notificationRequest.bulletin.sectionID]) {
+        if ([sectionID isEqualToString:[cell.contentViewController.notificationRequest sxiStackID]]) {
             if (!frameFound) {
                 frameFound = true;
                 frame = cell.frame;
@@ -1209,6 +1236,7 @@ static void displayStatusChanged(CFNotificationCenterRef center, void *observer,
     HBPreferences *file = [[HBPreferences alloc] initWithIdentifier:@"io.ominousness.stackxi"];
     bool enabled = [([file objectForKey:@"Enabled"] ?: @(YES)) boolValue];
     showButtons = [([file objectForKey:@"ShowButtons"] ?: @(2)) intValue];
+    groupBy = [([file objectForKey:@"GroupBy"] ?: @(0)) intValue];
     useIcons = [([file objectForKey:@"UseIcons"] ?: @(NO)) boolValue];
     NSString *iconTheme = [([file objectForKey:@"IconTheme"] ?: @"Default") stringValue];
     iconClearAllPath = [NSString stringWithFormat:ICON_CLEAR_ALL_PATH, iconTheme];

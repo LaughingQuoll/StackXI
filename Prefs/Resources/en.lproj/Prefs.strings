@@ -12,4 +12,7 @@
   "SUPPORT_ME" = "Support me!";
   "OFF" = "Off";
   "ICON_THEME" = "Icon theme";
+  "GROUP_BY" = "Group notifications by";
+  "GROUP_BY_APP" = "App";
+  "GROUP_BY_THREAD" = "Thread";
 }
