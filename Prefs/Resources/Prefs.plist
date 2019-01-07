@@ -130,8 +130,8 @@
 			</array>
 			<key>validTitles</key>
 			<array>
-				<string>APP</string>
-				<string>THREAD</string>
+				<string>GROUP_BY_APP</string>
+				<string>GROUP_BY_THREAD</string>
 			</array>
 			<key>alignment</key>
 			<string>3</string>
