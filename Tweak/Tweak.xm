@@ -26,6 +26,7 @@ static int showButtons = 2; // 0 - StackXI default; 1 - iOS 12
 static int buttonWidth = 75;
 static int buttonHeight = 25;
 static int buttonSpacing = 5;
+static int headerPadding = 0;
 static int moreLabelHeight = 15;
 static int groupBy = 0;
 static NSDictionary<NSString*, NSString*> *translationDict;
@@ -764,18 +765,18 @@ static void fakeNotifications() {
 %new
 -(CGRect)sxiGetClearAllButtonFrame {
     if (self.sxiIsLTR) {
-        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - (2*buttonSpacing) - (2*buttonWidth), self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
+        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - (2*buttonSpacing) - (2*buttonWidth) - headerPadding, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
     } else {
-        return CGRectMake(self.view.frame.origin.x + buttonSpacing, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
+        return CGRectMake(self.view.frame.origin.x + buttonSpacing + headerPadding, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
     }
 }
 
 %new
 -(CGRect)sxiGetCollapseButtonFrame {
     if (self.sxiIsLTR) {
-        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - buttonSpacing - buttonWidth, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
+        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - buttonSpacing - buttonWidth - headerPadding, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
     } else {
-        return CGRectMake(self.view.frame.origin.x + (2*buttonSpacing) + buttonWidth, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
+        return CGRectMake(self.view.frame.origin.x + (2*buttonSpacing) + buttonWidth + headerPadding, self.view.frame.origin.y + buttonSpacing, buttonWidth, buttonHeight);
     }
 }
 
@@ -787,9 +788,9 @@ static void fakeNotifications() {
 %new
 -(CGRect)sxiGetTitleFrame {
     if (self.sxiIsLTR) {
-        return CGRectMake(self.view.frame.origin.x + buttonSpacing*2, self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - (buttonSpacing*4) - (buttonWidth*2), buttonHeight - buttonSpacing/2.0);
+        return CGRectMake(self.view.frame.origin.x + buttonSpacing + headerPadding, self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - (buttonSpacing*4) - (buttonWidth*2), buttonHeight - buttonSpacing/2.0);
     } else {
-        return CGRectMake(self.view.frame.origin.x + (buttonSpacing*4) + (buttonWidth*2), self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - (buttonSpacing*6) - (buttonWidth*2), buttonHeight - buttonSpacing/2.0);
+        return CGRectMake(self.view.frame.origin.x + (buttonSpacing*4) + (buttonWidth*2), self.view.frame.origin.y + buttonSpacing, self.view.frame.size.width - (buttonSpacing*5) - (buttonWidth*2) - headerPadding, buttonHeight - buttonSpacing/2.0);
     }
 }
 
@@ -1250,6 +1251,7 @@ static void displayStatusChanged(CFNotificationCenterRef center, void *observer,
 
     if (showButtons == 2) {
         buttonHeight = 30;
+        headerPadding = 5;
     }
 
     bool debug = false;
