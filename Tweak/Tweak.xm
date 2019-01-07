@@ -5,9 +5,6 @@
 #define kOneMoreNotif @"ONE_MORE_NOTIFICATION"
 #define kMoreNotifs @"MORE_NOTIFICATIONS"
 #define LANG_BUNDLE_PATH @"/Library/PreferenceBundles/StackXIPrefs.bundle/StackXILocalization.bundle"
-#define TEMPWIDTH 0
-#define TEMPDURATION 0.3
-#define CLEAR_DURATION 0.2
 #define MAX_SHOW_BEHIND 3 //amount of blank notifications to show behind each stack
 
 extern dispatch_queue_t __BBServerQueue;
@@ -27,6 +24,9 @@ static bool enabled = true;
 static bool remakeButtons = false;
 static int showButtons = 2; // 0 - StackXI default; 1 - iOS 12
 static int buttonWidth = 75;
+static float animationMultiplier = 1.0;
+static float animationDurationDefault = 0.2;
+static float animationDurationClear = 0.3;
 static int clearAllExpandedWidth = 100;
 static int clearAllCollapsedWidth = 30;
 static int clearAllHeight = 30;
@@ -237,7 +237,7 @@ static void fakeNotifications() {
     [dispatcher destination:nil requestsClearingNotificationRequests:@[self]];
     [listCollectionView sxiClear:self.notificationIdentifier];
     if (reload) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, CLEAR_DURATION * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (animationDurationClear*animationMultiplier) * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             canUpdate = true;
             [listCollectionView reloadData];
         });
@@ -252,7 +252,7 @@ static void fakeNotifications() {
     }
     
     [self sxiClear:false];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, CLEAR_DURATION * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (animationDurationClear*animationMultiplier) * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         canUpdate = true;
         [listCollectionView reloadData];
     });
@@ -508,7 +508,7 @@ static void fakeNotifications() {
     [dispatcher destination:nil requestsClearingNotificationRequests:[self.sxiAllRequests array]];
     [self.sxiAllRequests removeAllObjects];
     [listCollectionView sxiClearAll];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, CLEAR_DURATION * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (animationDurationClear*animationMultiplier) * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         canUpdate = true;
         [listCollectionView reloadData];
     });
@@ -615,12 +615,12 @@ static void fakeNotifications() {
 -(void)sxiUpdateClearAllButton {
     if (!self.sxiClearAllButton) return;
     if (![self hasContent] || !showClearAllButton) {
-        [UIView animateWithDuration:TEMPDURATION animations:^{
+        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
             self.sxiClearAllButton.alpha = 0.0;
         }];
         return;
     } else {
-        [UIView animateWithDuration:TEMPDURATION animations:^{
+        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
             self.sxiClearAllButton.alpha = 1.0;
         }];
     }
@@ -638,7 +638,7 @@ static void fakeNotifications() {
 
     [self.sxiClearAllButton.titleLabel setTextAlignment:NSTextAlignmentCenter];
 
-    [UIView animateWithDuration:TEMPDURATION animations:^{
+    [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
         self.sxiClearAllButton.frame = [self sxiGetClearAllButtonFrame];
         self.sxiClearAllButton.vibrancy.frame = self.sxiClearAllButton.bounds;
         self.sxiClearAllButton.blur.frame = self.sxiClearAllButton.bounds;
@@ -885,7 +885,7 @@ static void fakeNotifications() {
 %new
 -(void)sxiCollapse:(UIButton *)button {
     [self.notificationRequest sxiCollapse];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, TEMPDURATION * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (animationDurationDefault*animationMultiplier) * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         [listCollectionView reloadData];
     });
 }
@@ -1117,7 +1117,7 @@ static void fakeNotifications() {
     }
 
     if (!inBanner && self.notificationRequest.sxiIsStack && !self.notificationRequest.sxiIsExpanded && [self.notificationRequest.sxiStackedNotificationRequests count] > 0) {
-        [UIView animateWithDuration:TEMPDURATION animations:^{
+        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
             self.sxiNotificationCount.alpha = 0;
         }];
         [self.notificationRequest sxiExpand];
@@ -1183,7 +1183,7 @@ static void fakeNotifications() {
         id c = [self _visibleCellForIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
         if (!c) continue;
         NCNotificationListCell* cell = (NCNotificationListCell*)c;
-        [UIView animateWithDuration:CLEAR_DURATION animations:^{
+        [UIView animateWithDuration:(animationDurationClear*animationMultiplier) animations:^{
             cell.alpha = 0.0;
         }];
     }
@@ -1197,7 +1197,7 @@ static void fakeNotifications() {
         NCNotificationListCell* cell = (NCNotificationListCell*)c;
         if ([notificationIdentifier isEqualToString:cell.contentViewController.notificationRequest.notificationIdentifier]) {
             
-            [UIView animateWithDuration:CLEAR_DURATION animations:^{
+            [UIView animateWithDuration:(animationDurationClear*animationMultiplier) animations:^{
                 cell.alpha = 0.0;
             }];
         }
@@ -1261,7 +1261,7 @@ static void fakeNotifications() {
                         cell.sxiReturnSVToOrigFrame = true;
                         cell.sxiSVOrigFrame = svFrame;
 
-                        [UIView animateWithDuration:TEMPDURATION animations:^{
+                        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
                             controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y + offset, svFrame.size.width, svFrame.size.height - offset);
                         }];
                     }
@@ -1274,7 +1274,7 @@ static void fakeNotifications() {
 
             CGRect properFrame = cell.frame;
             cell.frame = frame;
-            [UIView animateWithDuration:TEMPDURATION animations:^{
+            [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
                 cell.frame = properFrame;
             }];
         }
@@ -1306,7 +1306,7 @@ static void fakeNotifications() {
                         CGRect ncFrame = controller.sxiNotificationCount.frame;
                         controller.sxiNotificationCount.frame = CGRectMake(ncFrame.origin.x, ncFrame.origin.y + offset, ncFrame.size.width, ncFrame.size.height);
 
-                        [UIView animateWithDuration:TEMPDURATION animations:^{
+                        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
                             controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - offset, svFrame.size.width, svFrame.size.height + offset);
                             cell.frame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y, cell.frame.size.width, cell.frame.size.height - offset + moreLabelHeight);
                             controller.sxiNotificationCount.frame = ncFrame;
@@ -1318,11 +1318,11 @@ static void fakeNotifications() {
             }
 
             if (cell.contentViewController.notificationRequest.sxiPositionInStack > MAX_SHOW_BEHIND) {
-                [UIView animateWithDuration:TEMPDURATION animations:^{
+                [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
                     cell.alpha = 0.0;
                 }];
             } else {
-                [UIView animateWithDuration:TEMPDURATION animations:^{
+                [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
                     cell.frame = CGRectMake(frame.origin.x + (10 * cell.contentViewController.notificationRequest.sxiPositionInStack), frame.origin.y + 50 + (15 * cell.contentViewController.notificationRequest.sxiPositionInStack), frame.size.width - (20 * cell.contentViewController.notificationRequest.sxiPositionInStack), 50);
                 }];
             }
@@ -1392,6 +1392,9 @@ void reloadPreferences() {
     showClearAllButton = [([file objectForKey:@"ShowClearAll"] ?: @(YES)) boolValue];
     NSString *iconTheme = [([file objectForKey:@"IconTheme"] ?: @"Default") stringValue];
     currentTheme = [SXITheme themeWithPath:[SXIThemesDirectory stringByAppendingPathComponent:iconTheme]];
+
+    int speed = [([file objectForKey:@"AnimationSpeed"] ?: @(5)) intValue];
+    animationMultiplier = speed*2.0/10.0;
 
     if (useIcons) {
         buttonWidth = 45;

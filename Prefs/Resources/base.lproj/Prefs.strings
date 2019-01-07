@@ -16,4 +16,5 @@
   "GROUP_BY_APP" = "App";
   "GROUP_BY_THREAD" = "Thread";
   "SHOW_CLEAR_ALL" = 'Show "Clear All" button over all notifications';
+  "ANIMATION_SPEED" = 'Animation speed';
 }
