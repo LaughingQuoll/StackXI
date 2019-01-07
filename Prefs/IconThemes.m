@@ -149,6 +149,8 @@
 
     SXIPrefsListController *parent = (SXIPrefsListController *)self.parentController;
     [parent setThemeName:selectedTheme];
+
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)SXINotification, nil, nil, true);
 }
 
 @end

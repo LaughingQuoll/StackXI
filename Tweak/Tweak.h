@@ -837,6 +837,7 @@
 -(void)sxiClearAll:(UIButton *)button;
 -(CGRect)sxiGetClearAllButtonFrame;
 -(void)sxiUpdateClearAllButton;
+-(void)sxiMakeClearAllButton;
 
 -(NCNotificationListCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath;
 -(CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath;

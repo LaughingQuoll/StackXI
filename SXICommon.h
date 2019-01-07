@@ -1,4 +1,5 @@
 #define SXIPrefsIdentifier @"io.ominousness.stackxi"
+#define SXINotification @"io.ominousness.stackxi/ReloadPrefs"
 #define SXIThemesDirectory @"/Library/StackXI/"
 
 @interface SXITheme : NSObject

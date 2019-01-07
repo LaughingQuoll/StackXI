@@ -23,12 +23,15 @@ static bool useIcons = false;
 static bool canUpdate = true;
 static bool isOnLockscreen = true;
 static bool showClearAllButton = true;
+static bool enabled = true;
+static bool remakeButtons = false;
 static int showButtons = 2; // 0 - StackXI default; 1 - iOS 12
 static int buttonWidth = 75;
 static int clearAllExpandedWidth = 100;
 static int clearAllCollapsedWidth = 30;
 static int clearAllHeight = 30;
 static int clearAllImageWidth = 20; // 20 + 2*5 (inset)
+static int clearAllButtonSpacing = 5;
 static int buttonHeight = 25;
 static int buttonSpacing = 5;
 static int headerPadding = 0;
@@ -548,9 +551,9 @@ static void fakeNotifications() {
         width = clearAllExpandedWidth;
     }
     if (self.sxiIsLTR) {
-        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - buttonSpacing - width - headerPadding, self.view.frame.origin.y + buttonSpacing - 50, width, clearAllHeight);
+        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - clearAllButtonSpacing - width - clearAllButtonSpacing, self.view.frame.origin.y + clearAllButtonSpacing - (clearAllHeight + clearAllButtonSpacing*4), width, clearAllHeight);
     } else {
-        return CGRectMake(self.view.frame.origin.x + (2*buttonSpacing) + width + headerPadding, self.view.frame.origin.y + buttonSpacing - 50, width, clearAllHeight);
+        return CGRectMake(self.view.frame.origin.x + (2*clearAllButtonSpacing) + width + clearAllButtonSpacing, self.view.frame.origin.y + clearAllButtonSpacing - (clearAllHeight + clearAllButtonSpacing*4), width, clearAllHeight);
     }
 }
 
@@ -570,37 +573,42 @@ static void fakeNotifications() {
     }
 
     if (!self.sxiClearAllButton) {
-        self.sxiClearAllButton = [[SXIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
-        [self.sxiClearAllButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
-        self.sxiClearAllButton.hidden = NO;
-        self.sxiClearAllButton.alpha = 1.0;
-        [self.sxiClearAllButton setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
-        //self.sxiClearAllButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
-        [self.sxiClearAllButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        self.sxiClearAllButton.layer.masksToBounds = true;
-        self.sxiClearAllButton.layer.cornerRadius = clearAllHeight/2.0;
-        self.sxiClearAllButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
-        [self.sxiClearAllButton addBlurEffect];
-
-        [self.sxiClearAllButton addTarget:self action:@selector(sxiClearAll:) forControlEvents:UIControlEventTouchUpInside];
-        [self.view.subviews[0] addSubview:self.sxiClearAllButton];
-
-        float inset = 5.0;
-        self.sxiClearAllButton.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-        self.sxiClearAllButton.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
-
-        self.sxiClearAllButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
-        [self.sxiClearAllButton setTitle:NULL forState:UIControlStateNormal];
-        UIImage *btnClearAllImage = [currentTheme getIcon:@"SXIClearAll.png"];
-        [self.sxiClearAllButton setImage:btnClearAllImage forState:UIControlStateNormal];
-        self.sxiClearAllButton.tintColor = [UIColor blackColor];
-
-        self.sxiClearAllConfirm = false;
+        [self sxiMakeClearAllButton];
     }
 
     [self sxiUpdateClearAllButton];
 
     [self.view.subviews[0] bringSubviewToFront:self.sxiClearAllButton];
+}
+
+%new;
+-(void)sxiMakeClearAllButton {
+    self.sxiClearAllButton = [[SXIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
+    [self.sxiClearAllButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
+    self.sxiClearAllButton.hidden = NO;
+    self.sxiClearAllButton.alpha = 1.0;
+    [self.sxiClearAllButton setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
+    //self.sxiClearAllButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
+    [self.sxiClearAllButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    self.sxiClearAllButton.layer.masksToBounds = true;
+    self.sxiClearAllButton.layer.cornerRadius = clearAllHeight/2.0;
+    self.sxiClearAllButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+    [self.sxiClearAllButton addBlurEffect];
+
+    [self.sxiClearAllButton addTarget:self action:@selector(sxiClearAll:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view.subviews[0] addSubview:self.sxiClearAllButton];
+
+    float inset = 5.0;
+    self.sxiClearAllButton.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+    self.sxiClearAllButton.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
+
+    self.sxiClearAllButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    [self.sxiClearAllButton setTitle:NULL forState:UIControlStateNormal];
+    UIImage *btnClearAllImage = [currentTheme getIcon:@"SXIClearAll.png"];
+    [self.sxiClearAllButton setImage:btnClearAllImage forState:UIControlStateNormal];
+    self.sxiClearAllButton.tintColor = [UIColor blackColor];
+
+    self.sxiClearAllConfirm = false;
 }
 
 %new;
@@ -623,6 +631,9 @@ static void fakeNotifications() {
     if (!self.sxiClearAllConfirm) {
         insets = UIEdgeInsetsMake(inset, inset, inset, inset);
         titleInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+    } else if (!self.sxiIsLTR) {
+        insets = UIEdgeInsetsMake(inset, clearAllImageWidth - 2*inset, inset, inset);
+        titleInsets = UIEdgeInsetsMake(0, 0, 0, (clearAllExpandedWidth - clearAllImageWidth)/2);
     }
 
     [self.sxiClearAllButton.titleLabel setTextAlignment:NSTextAlignmentCenter];
@@ -1142,8 +1153,20 @@ static void fakeNotifications() {
         if (!c) continue;
 
         NCNotificationListCell* cell = (NCNotificationListCell*)c;
+        NCNotificationShortLookViewController *cvc = (NCNotificationShortLookViewController *)cell.contentViewController;
         [self sendSubviewToBack:cell];
-        [(NCNotificationShortLookViewController *)cell.contentViewController sxiUpdateCount];
+        if (remakeButtons) {
+            [cvc.sxiClearAllButton removeFromSuperview];
+            [cvc.sxiCollapseButton removeFromSuperview];
+            [cvc.sxiTitle removeFromSuperview];
+            [cvc.sxiNotificationCount removeFromSuperview];
+
+            cvc.sxiClearAllButton = nil;
+            cvc.sxiCollapseButton = nil;
+            cvc.sxiTitle = nil;
+            cvc.sxiNotificationCount = nil;
+        }
+        [cvc sxiUpdateCount];
     }
 
     //LPP compatibility
@@ -1360,9 +1383,9 @@ static void displayStatusChanged(CFNotificationCenterRef center, void *observer,
     [clvc sxiUpdateClearAllButton];
 }
 
-%ctor{
+void reloadPreferences() {
     HBPreferences *file = [[HBPreferences alloc] initWithIdentifier:@"io.ominousness.stackxi"];
-    bool enabled = [([file objectForKey:@"Enabled"] ?: @(YES)) boolValue];
+    enabled = [([file objectForKey:@"Enabled"] ?: @(YES)) boolValue];
     showButtons = [([file objectForKey:@"ShowButtons"] ?: @(2)) intValue];
     groupBy = [([file objectForKey:@"GroupBy"] ?: @(0)) intValue];
     useIcons = [([file objectForKey:@"UseIcons"] ?: @(YES)) boolValue];
@@ -1372,13 +1395,36 @@ static void displayStatusChanged(CFNotificationCenterRef center, void *observer,
 
     if (useIcons) {
         buttonWidth = 45;
+    } else {
+        buttonWidth = 75;
     }
 
     if (showButtons == 2) {
         buttonHeight = 30;
         headerPadding = 5;
+    } else {
+        buttonHeight = 25;
+        headerPadding = 0;
     }
 
+    if (clvc) {
+        clvc.sxiClearAllConfirm = false;
+        [clvc.sxiClearAllButton removeFromSuperview];
+        clvc.sxiClearAllButton = nil;
+        [clvc sxiMakeClearAllButton];
+        [clvc sxiUpdateClearAllButton];
+    }
+
+    if (listCollectionView) {
+        remakeButtons = true;
+        [listCollectionView reloadData];
+        remakeButtons = false;
+    }
+}
+
+%ctor{
+    reloadPreferences();
+    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadPreferences, (CFStringRef)SXINotification, NULL, kNilOptions);
     bool debug = false;
     #ifdef DEBUG
     debug = true;

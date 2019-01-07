@@ -25,13 +25,13 @@
 			<string>Enabled</string>
 			<key>alternateColors</key>
 			<true/>
+			<key>PostNotification</key>
+			<string>io.ominousness.stackxi/ReloadPrefs</string>
 		</dict>
 
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>id</key>
-			<string>Type</string>
 			<key>label</key>
 			<string>SHOW_BUTTONS</string>
 		</dict>
@@ -58,6 +58,8 @@
 			</array>
 			<key>alignment</key>
 			<string>3</string>
+			<key>PostNotification</key>
+			<string>io.ominousness.stackxi/ReloadPrefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -72,6 +74,8 @@
 			<string>UseIcons</string>
 			<key>alternateColors</key>
 			<true/>
+			<key>PostNotification</key>
+			<string>io.ominousness.stackxi/ReloadPrefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -86,6 +90,8 @@
 			<string>ShowClearAll</string>
 			<key>alternateColors</key>
 			<true/>
+			<key>PostNotification</key>
+			<string>io.ominousness.stackxi/ReloadPrefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -105,8 +111,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>id</key>
-			<string>Type</string>
 			<key>label</key>
 			<string>GROUP_BY</string>
 		</dict>
@@ -131,6 +135,8 @@
 			</array>
 			<key>alignment</key>
 			<string>3</string>
+			<key>PostNotification</key>
+			<string>io.ominousness.stackxi/ReloadPrefs</string>
 		</dict>
 
 		<!-- Credits -->
