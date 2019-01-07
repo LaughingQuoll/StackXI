@@ -615,14 +615,14 @@ static void fakeNotifications() {
 -(void)sxiUpdateClearAllButton {
     if (!self.sxiClearAllButton) return;
     if (![self hasContent] || !showClearAllButton) {
-        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
             self.sxiClearAllButton.alpha = 0.0;
-        }];
+        } completion:NULL];
         return;
     } else {
-        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
             self.sxiClearAllButton.alpha = 1.0;
-        }];
+        } completion:NULL];
     }
 
     float inset = 5.0;
@@ -638,14 +638,14 @@ static void fakeNotifications() {
 
     [self.sxiClearAllButton.titleLabel setTextAlignment:NSTextAlignmentCenter];
 
-    [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+    [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
         self.sxiClearAllButton.frame = [self sxiGetClearAllButtonFrame];
         self.sxiClearAllButton.vibrancy.frame = self.sxiClearAllButton.bounds;
         self.sxiClearAllButton.blur.frame = self.sxiClearAllButton.bounds;
         
         self.sxiClearAllButton.imageEdgeInsets = insets;
         self.sxiClearAllButton.titleEdgeInsets = titleInsets;
-    }];
+    } completion:NULL];
 }
 
 %new;
@@ -1117,9 +1117,9 @@ static void fakeNotifications() {
     }
 
     if (!inBanner && self.notificationRequest.sxiIsStack && !self.notificationRequest.sxiIsExpanded && [self.notificationRequest.sxiStackedNotificationRequests count] > 0) {
-        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
             self.sxiNotificationCount.alpha = 0;
-        }];
+        } completion:NULL];
         [self.notificationRequest sxiExpand];
         return;
     }
@@ -1183,9 +1183,9 @@ static void fakeNotifications() {
         id c = [self _visibleCellForIndexPath:[NSIndexPath indexPathForRow:row inSection:0]];
         if (!c) continue;
         NCNotificationListCell* cell = (NCNotificationListCell*)c;
-        [UIView animateWithDuration:(animationDurationClear*animationMultiplier) animations:^{
+        [UIView animateWithDuration:(animationDurationClear*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
             cell.alpha = 0.0;
-        }];
+        } completion:NULL];
     }
 }
 
@@ -1197,9 +1197,9 @@ static void fakeNotifications() {
         NCNotificationListCell* cell = (NCNotificationListCell*)c;
         if ([notificationIdentifier isEqualToString:cell.contentViewController.notificationRequest.notificationIdentifier]) {
             
-            [UIView animateWithDuration:(animationDurationClear*animationMultiplier) animations:^{
+            [UIView animateWithDuration:(animationDurationClear*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                 cell.alpha = 0.0;
-            }];
+            } completion:NULL];
         }
     }
 }
@@ -1261,9 +1261,9 @@ static void fakeNotifications() {
                         cell.sxiReturnSVToOrigFrame = true;
                         cell.sxiSVOrigFrame = svFrame;
 
-                        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+                        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                             controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y + offset, svFrame.size.width, svFrame.size.height - offset);
-                        }];
+                        } completion:NULL];
                     }
                 }
 
@@ -1274,9 +1274,9 @@ static void fakeNotifications() {
 
             CGRect properFrame = cell.frame;
             cell.frame = frame;
-            [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+            [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                 cell.frame = properFrame;
-            }];
+            } completion:NULL];
         }
     }
 }
@@ -1306,11 +1306,11 @@ static void fakeNotifications() {
                         CGRect ncFrame = controller.sxiNotificationCount.frame;
                         controller.sxiNotificationCount.frame = CGRectMake(ncFrame.origin.x, ncFrame.origin.y + offset, ncFrame.size.width, ncFrame.size.height);
 
-                        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+                        [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                             controller.scrollView.frame = CGRectMake(svFrame.origin.x, svFrame.origin.y - offset, svFrame.size.width, svFrame.size.height + offset);
                             cell.frame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y, cell.frame.size.width, cell.frame.size.height - offset + moreLabelHeight);
                             controller.sxiNotificationCount.frame = ncFrame;
-                        }];
+                        } completion:NULL];
                     }
                 }
 
@@ -1318,13 +1318,13 @@ static void fakeNotifications() {
             }
 
             if (cell.contentViewController.notificationRequest.sxiPositionInStack > MAX_SHOW_BEHIND) {
-                [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+                [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                     cell.alpha = 0.0;
-                }];
+                } completion:NULL];
             } else {
-                [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) animations:^{
+                [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                     cell.frame = CGRectMake(frame.origin.x + (10 * cell.contentViewController.notificationRequest.sxiPositionInStack), frame.origin.y + 50 + (15 * cell.contentViewController.notificationRequest.sxiPositionInStack), frame.size.width - (20 * cell.contentViewController.notificationRequest.sxiPositionInStack), 50);
-                }];
+                } completion:NULL];
             }
         }
     }
