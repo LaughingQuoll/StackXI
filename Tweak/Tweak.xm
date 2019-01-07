@@ -505,7 +505,13 @@ static void fakeNotifications() {
 %new
 -(void)sxiClearAll {
     canUpdate = false;
-    [dispatcher destination:nil requestsClearingNotificationRequests:[self.sxiAllRequests array]];
+    NSMutableArray *temp = [NSMutableArray new];
+    for (NCNotificationRequest *req in self.sxiAllRequests) {
+        if (req && req.bulletin && req.notificationIdentifier) {
+            [temp addObject:req];
+        }
+    }
+    [dispatcher destination:nil requestsClearingNotificationRequests:temp];
     [self.sxiAllRequests removeAllObjects];
     [listCollectionView sxiClearAll];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (animationDurationClear*animationMultiplier) * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
