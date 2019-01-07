@@ -22,8 +22,13 @@ static NCNotificationDispatcher *dispatcher = nil;
 static bool useIcons = false;
 static bool canUpdate = true;
 static bool isOnLockscreen = true;
+static bool showClearAllButton = true;
 static int showButtons = 2; // 0 - StackXI default; 1 - iOS 12
 static int buttonWidth = 75;
+static int clearAllExpandedWidth = 100;
+static int clearAllCollapsedWidth = 30;
+static int clearAllHeight = 30;
+static int clearAllImageWidth = 20; // 20 + 2*5 (inset)
 static int buttonHeight = 25;
 static int buttonSpacing = 5;
 static int headerPadding = 0;
@@ -40,25 +45,25 @@ UIImage * imageWithView(UIView *view) {
     UIGraphicsEndImageContext();
     return img;
 }
+@implementation SXIButton
 
-@interface UIButton(Blur)
-- (void)addBlurEffect;
-@end
-
-@implementation UIButton(Blur)
+@synthesize blur, vibrancy;
 
 - (void)addBlurEffect {
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
-    UIVisualEffectView *blur = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-    blur.frame = self.bounds;
-    blur.userInteractionEnabled = false;
+    UIVisualEffectView *blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    blurView.frame = self.bounds;
+    blurView.userInteractionEnabled = false;
 
-    UIVisualEffectView *vibrancy = [[UIVisualEffectView alloc] initWithEffect:[UIVibrancyEffect effectForBlurEffect:blurEffect]];
-    vibrancy.frame = self.bounds;
-    vibrancy.userInteractionEnabled = false;
+    UIVisualEffectView *vibrancyView = [[UIVisualEffectView alloc] initWithEffect:[UIVibrancyEffect effectForBlurEffect:blurEffect]];
+    vibrancyView.frame = self.bounds;
+    vibrancyView.userInteractionEnabled = false;
 
-    [[blur contentView] addSubview:vibrancy];
-    [self insertSubview:blur atIndex:0];
+    self.blur = blurView;
+    self.vibrancy = vibrancyView;
+
+    [[blur contentView] addSubview:vibrancyView];
+    [self insertSubview:blurView atIndex:0];
     if (UIImageView *imageView = self.imageView) {
         [self bringSubviewToFront:imageView];
     }
@@ -446,6 +451,9 @@ static void fakeNotifications() {
 
     if (!found) {
         %orig;
+        clvc.sxiClearAllConfirm = false;
+        [clvc sxiUpdateClearAllButton];
+
         request.sxiVisible = true;
         [self.sxiAllRequests addObject:request];
         [listCollectionView reloadData];
@@ -465,6 +473,8 @@ static void fakeNotifications() {
         }
     }
 
+    clvc.sxiClearAllConfirm = false;
+    [clvc sxiUpdateClearAllButton];
     [self.sxiAllRequests removeObject:request];
     [listCollectionView reloadData];
     return 0;
@@ -499,6 +509,9 @@ static void fakeNotifications() {
         canUpdate = true;
         [listCollectionView reloadData];
     });
+
+    clvc.sxiClearAllConfirm = false;
+    [clvc sxiUpdateClearAllButton];
 }
 
 %end
@@ -517,10 +530,28 @@ static void fakeNotifications() {
 
 %hook NCNotificationCombinedListViewController
 
+%property (retain) SXIButton* sxiClearAllButton;
+%property (assign,nonatomic) BOOL sxiClearAllConfirm;
+%property (assign,nonatomic) BOOL sxiIsLTR;
+
 -(id)init {
     id orig = %orig;
     clvc = self;
     return orig;
+}
+
+
+%new
+-(CGRect)sxiGetClearAllButtonFrame {
+    int width = clearAllCollapsedWidth;
+    if (self.sxiClearAllConfirm) {
+        width = clearAllExpandedWidth;
+    }
+    if (self.sxiIsLTR) {
+        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - buttonSpacing - width - headerPadding, self.view.frame.origin.y + buttonSpacing - 50, width, clearAllHeight);
+    } else {
+        return CGRectMake(self.view.frame.origin.x + (2*buttonSpacing) + width + headerPadding, self.view.frame.origin.y + buttonSpacing - 50, width, clearAllHeight);
+    }
 }
 
 -(void)clearAllNonPersistent {
@@ -531,13 +562,104 @@ static void fakeNotifications() {
     return true;
 }*/
 
+-(void)viewDidLayoutSubviews {
+    %orig;
+    self.sxiIsLTR = true;
+    if ([UIView userInterfaceLayoutDirectionForSemanticContentAttribute:self.view.semanticContentAttribute] == UIUserInterfaceLayoutDirectionRightToLeft) {
+        self.sxiIsLTR = false;
+    }
+
+    if (!self.sxiClearAllButton) {
+        self.sxiClearAllButton = [[SXIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
+        [self.sxiClearAllButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
+        self.sxiClearAllButton.hidden = NO;
+        self.sxiClearAllButton.alpha = 1.0;
+        [self.sxiClearAllButton setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
+        //self.sxiClearAllButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
+        [self.sxiClearAllButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        self.sxiClearAllButton.layer.masksToBounds = true;
+        self.sxiClearAllButton.layer.cornerRadius = clearAllHeight/2.0;
+        self.sxiClearAllButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        [self.sxiClearAllButton addBlurEffect];
+
+        [self.sxiClearAllButton addTarget:self action:@selector(sxiClearAll:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view.subviews[0] addSubview:self.sxiClearAllButton];
+
+        float inset = 5.0;
+        self.sxiClearAllButton.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+        self.sxiClearAllButton.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
+
+        self.sxiClearAllButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        [self.sxiClearAllButton setTitle:NULL forState:UIControlStateNormal];
+        UIImage *btnClearAllImage = [currentTheme getIcon:@"SXIClearAll.png"];
+        [self.sxiClearAllButton setImage:btnClearAllImage forState:UIControlStateNormal];
+        self.sxiClearAllButton.tintColor = [UIColor blackColor];
+
+        self.sxiClearAllConfirm = false;
+    }
+
+    [self sxiUpdateClearAllButton];
+
+    [self.view.subviews[0] bringSubviewToFront:self.sxiClearAllButton];
+}
+
+%new;
+-(void)sxiUpdateClearAllButton {
+    if (!self.sxiClearAllButton) return;
+    if (![self hasContent] || !showClearAllButton) {
+        [UIView animateWithDuration:TEMPDURATION animations:^{
+            self.sxiClearAllButton.alpha = 0.0;
+        }];
+        return;
+    } else {
+        [UIView animateWithDuration:TEMPDURATION animations:^{
+            self.sxiClearAllButton.alpha = 1.0;
+        }];
+    }
+
+    float inset = 5.0;
+    UIEdgeInsets insets = UIEdgeInsetsMake(inset, inset, inset, clearAllExpandedWidth - clearAllImageWidth - 2*inset);
+    UIEdgeInsets titleInsets = UIEdgeInsetsMake(0, (-clearAllExpandedWidth + clearAllImageWidth)/2, 0, 0);
+    if (!self.sxiClearAllConfirm) {
+        insets = UIEdgeInsetsMake(inset, inset, inset, inset);
+        titleInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+    }
+
+    [self.sxiClearAllButton.titleLabel setTextAlignment:NSTextAlignmentCenter];
+
+    [UIView animateWithDuration:TEMPDURATION animations:^{
+        self.sxiClearAllButton.frame = [self sxiGetClearAllButtonFrame];
+        self.sxiClearAllButton.vibrancy.frame = self.sxiClearAllButton.bounds;
+        self.sxiClearAllButton.blur.frame = self.sxiClearAllButton.bounds;
+        
+        self.sxiClearAllButton.imageEdgeInsets = insets;
+        self.sxiClearAllButton.titleEdgeInsets = titleInsets;
+    }];
+}
+
+%new;
+-(void)sxiClearAll:(UIButton *)button {
+    if (!self.sxiClearAllConfirm) {
+        [self.sxiClearAllButton setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
+        self.sxiClearAllConfirm = true;
+        [self sxiUpdateClearAllButton];
+    } else {
+        [self.sxiClearAllButton setTitle:NULL forState: UIControlStateNormal];
+        [self _clearAllPriorityListNotificationRequests];
+    }
+}
+
 -(void)viewWillAppear:(bool)animated {
     [listCollectionView sxiCollapseAll];
+    self.sxiClearAllConfirm = false;
+    [self sxiUpdateClearAllButton];
     %orig;
 }
 
 -(void)viewWillDisappear:(bool)animated {
     [listCollectionView sxiCollapseAll];
+    self.sxiClearAllConfirm = false;
+    [self sxiUpdateClearAllButton];
     %orig;
 }
 
@@ -730,8 +852,8 @@ static void fakeNotifications() {
 
 %property (retain) UILabel* sxiNotificationCount;
 %property (retain) UILabel* sxiTitle;
-%property (retain) UIButton* sxiClearAllButton;
-%property (retain) UIButton* sxiCollapseButton;
+%property (retain) SXIButton* sxiClearAllButton;
+%property (retain) SXIButton* sxiCollapseButton;
 %property (assign,nonatomic) BOOL sxiIsLTR;
 
 -(void)viewWillAppear:(bool)whatever {
@@ -835,7 +957,7 @@ static void fakeNotifications() {
         [self.view addSubview:self.sxiNotificationCount];
 
         if (showButtons > 0) {
-            self.sxiClearAllButton = [[UIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
+            self.sxiClearAllButton = [[SXIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
             [self.sxiClearAllButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
             self.sxiClearAllButton.hidden = YES;
             self.sxiClearAllButton.alpha = 0.0;
@@ -846,7 +968,7 @@ static void fakeNotifications() {
             self.sxiClearAllButton.layer.cornerRadius = buttonHeight/2.0;
             [self.sxiClearAllButton addBlurEffect];
 
-            self.sxiCollapseButton = [[UIButton alloc] initWithFrame:[self sxiGetCollapseButtonFrame]];
+            self.sxiCollapseButton = [[SXIButton alloc] initWithFrame:[self sxiGetCollapseButtonFrame]];
             [self.sxiCollapseButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
             self.sxiCollapseButton.hidden = YES;
             self.sxiCollapseButton.alpha = 0.0;
@@ -1234,6 +1356,8 @@ static void fakeNotifications() {
 static void displayStatusChanged(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
     isOnLockscreen = true;
     [listCollectionView sxiCollapseAll];
+    clvc.sxiClearAllConfirm = false;
+    [clvc sxiUpdateClearAllButton];
 }
 
 %ctor{
@@ -1241,7 +1365,8 @@ static void displayStatusChanged(CFNotificationCenterRef center, void *observer,
     bool enabled = [([file objectForKey:@"Enabled"] ?: @(YES)) boolValue];
     showButtons = [([file objectForKey:@"ShowButtons"] ?: @(2)) intValue];
     groupBy = [([file objectForKey:@"GroupBy"] ?: @(0)) intValue];
-    useIcons = [([file objectForKey:@"UseIcons"] ?: @(NO)) boolValue];
+    useIcons = [([file objectForKey:@"UseIcons"] ?: @(YES)) boolValue];
+    showClearAllButton = [([file objectForKey:@"ShowClearAll"] ?: @(YES)) boolValue];
     NSString *iconTheme = [([file objectForKey:@"IconTheme"] ?: @"Default") stringValue];
     currentTheme = [SXITheme themeWithPath:[SXIThemesDirectory stringByAppendingPathComponent:iconTheme]];
 

@@ -13,6 +13,12 @@
 
 @end
 
+@interface SXIButton : UIButton 
+@property UIVisualEffectView *blur;
+@property UIVisualEffectView *vibrancy;
+- (void)addBlurEffect;
+@end
+
 @interface _UIBackdropView : UIView {
 	int  _style;
 }
@@ -696,8 +702,8 @@
 @interface NCNotificationShortLookViewController : NCNotificationViewController
 @property (nonatomic, retain) UILabel* sxiNotificationCount;
 @property (nonatomic, retain) UILabel* sxiTitle;
-@property (nonatomic, retain) UIButton* sxiClearAllButton;
-@property (nonatomic, retain) UIButton* sxiCollapseButton;
+@property (nonatomic, retain) SXIButton* sxiClearAllButton;
+@property (nonatomic, retain) SXIButton* sxiCollapseButton;
 @property (assign,nonatomic) bool sxiIsLTR;
 
 -(void)_handleTapOnView:(id)arg1 ;
@@ -824,7 +830,14 @@
 
 @interface NCNotificationCombinedListViewController : UIViewController
 
-@property (nonatomic, retain) NCNotificationPriorityList *notificationPriorityList;
+@property (nonatomic,retain) NCNotificationPriorityList * notificationPriorityList;
+@property (nonatomic, retain) SXIButton* sxiClearAllButton;
+@property (assign,nonatomic) BOOL sxiIsLTR;
+@property (assign,nonatomic) BOOL sxiClearAllConfirm;
+-(void)sxiClearAll:(UIButton *)button;
+-(CGRect)sxiGetClearAllButtonFrame;
+-(void)sxiUpdateClearAllButton;
+
 -(NCNotificationListCell*)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath;
 -(CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 -(void)reloadNotificationRequestsInNotificationHistorySection:(id)arg1 ;

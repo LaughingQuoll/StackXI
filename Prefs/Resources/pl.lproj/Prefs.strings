@@ -15,4 +15,5 @@
   "GROUP_BY" = "Grupuj powiadomienia";
   "GROUP_BY_APP" = "Aplikacja";
   "GROUP_BY_THREAD" = "Wątek";
+  "SHOW_CLEAR_ALL" = 'Pokaż przycisk "Wymaż wszystkie" nad powiadomieniami';
 }
