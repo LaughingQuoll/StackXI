@@ -57,6 +57,13 @@
 }
 
 - (void)preparePreviewImage {
+    UIImage *previewImage = [self getImage:@"SXIPreview.png"];
+
+    if (previewImage) {
+        self.image = previewImage;
+        return;
+    }
+
     UIImage *clearAll = [self getImage:@"SXIClearAll.png"];
     UIImage *collapse = [self getImage:@"SXICollapse.png"];
 
