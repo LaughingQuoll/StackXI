@@ -540,6 +540,7 @@ static void fakeNotifications() {
 %hook NCNotificationCombinedListViewController
 
 %property (retain) SXIButton* sxiClearAllButton;
+%property (retain) UINotificationFeedbackGenerator* sxiFeedbackGenerator;
 %property (assign,nonatomic) BOOL sxiClearAllConfirm;
 %property (assign,nonatomic) BOOL sxiIsLTR;
 %property (assign,nonatomic) BOOL sxiGRAdded;
@@ -616,6 +617,9 @@ static void fakeNotifications() {
 
 %new;
 -(void)sxiMakeClearAllButton {
+    if (!self.sxiFeedbackGenerator) {
+        self.sxiFeedbackGenerator = [UINotificationFeedbackGenerator new];
+    }
     self.sxiClearAllButton = [[SXIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
     [self.sxiClearAllButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
     self.sxiClearAllButton.hidden = NO;
@@ -687,9 +691,11 @@ static void fakeNotifications() {
         [self.sxiClearAllButton setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
         self.sxiClearAllConfirm = true;
         [self sxiUpdateClearAllButton];
+        [self.sxiFeedbackGenerator prepare];
     } else {
         [self.sxiClearAllButton setTitle:NULL forState: UIControlStateNormal];
         [self _clearAllPriorityListNotificationRequests];
+        [self.sxiFeedbackGenerator notificationOccurred:UINotificationFeedbackTypeSuccess];
     }
 }
 

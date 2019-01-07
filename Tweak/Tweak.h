@@ -831,7 +831,8 @@
 @interface NCNotificationCombinedListViewController : UIViewController
 
 @property (nonatomic,retain) NCNotificationPriorityList * notificationPriorityList;
-@property (nonatomic, retain) SXIButton* sxiClearAllButton;
+@property (nonatomic,retain) SXIButton* sxiClearAllButton;
+@property (nonatomic,retain) UINotificationFeedbackGenerator* sxiFeedbackGenerator;
 @property (assign,nonatomic) BOOL sxiIsLTR;
 @property (assign,nonatomic) BOOL sxiClearAllConfirm;
 @property (assign,nonatomic) BOOL sxiGRAdded;
