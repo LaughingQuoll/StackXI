@@ -10,4 +10,6 @@
   "DONATE_TO_NEPETA" = "Nepeta에게 기부";
   "SUPPORT_ME" = "지원해 주세요!";
   "USE_ICONS" = "아이콘 사용하기";
+  "OFF" = "끄기";
+  "ICON_THEME" = "아이콘 테마";
 }
