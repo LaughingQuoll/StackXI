@@ -1394,7 +1394,7 @@ void reloadPreferences() {
     currentTheme = [SXITheme themeWithPath:[SXIThemesDirectory stringByAppendingPathComponent:iconTheme]];
 
     int speed = [([file objectForKey:@"AnimationSpeed"] ?: @(5)) intValue];
-    animationMultiplier = speed*2.0/10.0;
+    animationMultiplier = (10.0-speed)*2.0/10.0;
 
     if (useIcons) {
         buttonWidth = 45;
