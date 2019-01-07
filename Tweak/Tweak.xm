@@ -536,6 +536,7 @@ static void fakeNotifications() {
 %property (retain) SXIButton* sxiClearAllButton;
 %property (assign,nonatomic) BOOL sxiClearAllConfirm;
 %property (assign,nonatomic) BOOL sxiIsLTR;
+%property (assign,nonatomic) BOOL sxiGRAdded;
 
 -(id)init {
     id orig = %orig;
@@ -543,6 +544,13 @@ static void fakeNotifications() {
     return orig;
 }
 
+-(void)scrollViewWillBeginDragging:(id)arg1 {
+    %orig;
+    if (self.sxiClearAllButton && self.sxiClearAllConfirm) {
+        self.sxiClearAllConfirm = false;
+        [self sxiUpdateClearAllButton];
+    }
+}
 
 %new
 -(CGRect)sxiGetClearAllButtonFrame {
@@ -567,6 +575,14 @@ static void fakeNotifications() {
 
 -(void)viewDidLayoutSubviews {
     %orig;
+    if (!self.sxiGRAdded) {
+        UITapGestureRecognizer *gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(sxiHandleGesture:)];
+        gr.numberOfTapsRequired = 0;
+        [self.view addGestureRecognizer:gr];
+
+        self.sxiGRAdded = true;
+    }
+
     self.sxiIsLTR = true;
     if ([UIView userInterfaceLayoutDirectionForSemanticContentAttribute:self.view.semanticContentAttribute] == UIUserInterfaceLayoutDirectionRightToLeft) {
         self.sxiIsLTR = false;
@@ -579,6 +595,17 @@ static void fakeNotifications() {
     [self sxiUpdateClearAllButton];
 
     [self.view.subviews[0] bringSubviewToFront:self.sxiClearAllButton];
+}
+
+%new;
+-(void)sxiHandleGesture:(UIGestureRecognizer *)gestureRecognizer {
+    if (!self.sxiClearAllButton || !self.sxiClearAllConfirm) return;
+
+    CGPoint p = [gestureRecognizer locationInView:self.view];
+    if (!CGRectContainsPoint(self.sxiClearAllButton.frame, p)) {
+        self.sxiClearAllConfirm = false;
+        [self sxiUpdateClearAllButton];
+    }
 }
 
 %new;
@@ -1114,6 +1141,11 @@ static void fakeNotifications() {
     bool inBanner = FALSE;
     if (!self.nextResponder || !self.nextResponder.nextResponder || ![NSStringFromClass([self.nextResponder.nextResponder class]) isEqualToString:@"NCNotificationListCell"]) {
         inBanner = TRUE; //probably, but it's a safe assumption
+    }
+
+    if (clvc.sxiClearAllButton && clvc.sxiClearAllConfirm) {
+        clvc.sxiClearAllConfirm = false;
+        [clvc sxiUpdateClearAllButton];
     }
 
     if (!inBanner && self.notificationRequest.sxiIsStack && !self.notificationRequest.sxiIsExpanded && [self.notificationRequest.sxiStackedNotificationRequests count] > 0) {

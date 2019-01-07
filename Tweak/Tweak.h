@@ -834,6 +834,9 @@
 @property (nonatomic, retain) SXIButton* sxiClearAllButton;
 @property (assign,nonatomic) BOOL sxiIsLTR;
 @property (assign,nonatomic) BOOL sxiClearAllConfirm;
+@property (assign,nonatomic) BOOL sxiGRAdded;
+
+-(void)sxiHandleGesture:(UIGestureRecognizer *)gestureRecognizer;
 -(void)sxiClearAll:(UIButton *)button;
 -(CGRect)sxiGetClearAllButtonFrame;
 -(void)sxiUpdateClearAllButton;
