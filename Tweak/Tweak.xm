@@ -551,9 +551,9 @@ static void fakeNotifications() {
         width = clearAllExpandedWidth;
     }
     if (self.sxiIsLTR) {
-        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - clearAllButtonSpacing - width - clearAllButtonSpacing, self.view.frame.origin.y + clearAllButtonSpacing - (clearAllHeight + clearAllButtonSpacing*4), width, clearAllHeight);
+        return CGRectMake(self.view.frame.origin.x + self.view.frame.size.width - (2*clearAllButtonSpacing) - width, self.view.frame.origin.y - (clearAllHeight + clearAllButtonSpacing*3), width, clearAllHeight);
     } else {
-        return CGRectMake(self.view.frame.origin.x + (2*clearAllButtonSpacing) + width + clearAllButtonSpacing, self.view.frame.origin.y + clearAllButtonSpacing - (clearAllHeight + clearAllButtonSpacing*4), width, clearAllHeight);
+        return CGRectMake(self.view.frame.origin.x + (2*clearAllButtonSpacing), self.view.frame.origin.y - (clearAllHeight + clearAllButtonSpacing*3), width, clearAllHeight);
     }
 }
 
@@ -632,8 +632,8 @@ static void fakeNotifications() {
         insets = UIEdgeInsetsMake(inset, inset, inset, inset);
         titleInsets = UIEdgeInsetsMake(0, 0, 0, 0);
     } else if (!self.sxiIsLTR) {
-        insets = UIEdgeInsetsMake(inset, clearAllImageWidth - 2*inset, inset, inset);
-        titleInsets = UIEdgeInsetsMake(0, 0, 0, (clearAllExpandedWidth - clearAllImageWidth)/2);
+        insets = UIEdgeInsetsMake(inset, clearAllExpandedWidth - clearAllImageWidth - 2*inset, inset, inset);
+        titleInsets = UIEdgeInsetsMake(0, 0, 0, (-clearAllExpandedWidth + clearAllImageWidth)/2);
     }
 
     [self.sxiClearAllButton.titleLabel setTextAlignment:NSTextAlignmentCenter];
