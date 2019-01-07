@@ -4,8 +4,6 @@
 #define kCollapse @"COLLAPSE"
 #define kOneMoreNotif @"ONE_MORE_NOTIFICATION"
 #define kMoreNotifs @"MORE_NOTIFICATIONS"
-#define ICON_COLLAPSE_PATH @"/Library/StackXI/%@/SXICollapse.png"
-#define ICON_CLEAR_ALL_PATH @"/Library/StackXI/%@/SXIClearAll.png"
 #define LANG_BUNDLE_PATH @"/Library/PreferenceBundles/StackXIPrefs.bundle/StackXILocalization.bundle"
 #define TEMPWIDTH 0
 #define TEMPDURATION 0.3
@@ -31,8 +29,7 @@ static int buttonSpacing = 5;
 static int moreLabelHeight = 15;
 static int groupBy = 0;
 static NSDictionary<NSString*, NSString*> *translationDict;
-static NSString *iconCollapsePath;
-static NSString *iconClearAllPath;
+static SXITheme *currentTheme;
 static NSArray *appsStackableByTitle = @[@"com.junecloud.Deliveries", @"com.google.hangouts", @"com.facebook.Messenger"]; //TODO: applist?
 
 UIImage * imageWithView(UIView *view) {
@@ -870,13 +867,13 @@ static void fakeNotifications() {
 
                 self.sxiCollapseButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
                 [self.sxiCollapseButton setTitle:NULL forState:UIControlStateNormal];
-                UIImage *btnCollapseImage = [[UIImage imageWithContentsOfFile:iconCollapsePath] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                UIImage *btnCollapseImage = [currentTheme getIcon:@"SXICollapse.png"];
                 [self.sxiCollapseButton setImage:btnCollapseImage forState:UIControlStateNormal];
                 self.sxiCollapseButton.tintColor = [UIColor blackColor];
 
                 self.sxiClearAllButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
                 [self.sxiClearAllButton setTitle:NULL forState:UIControlStateNormal];
-                UIImage *btnClearAllImage = [[UIImage imageWithContentsOfFile:iconClearAllPath] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                UIImage *btnClearAllImage = [currentTheme getIcon:@"SXIClearAll.png"];
                 [self.sxiClearAllButton setImage:btnClearAllImage forState:UIControlStateNormal];
                 self.sxiClearAllButton.tintColor = [UIColor blackColor];
             }
@@ -1245,8 +1242,8 @@ static void displayStatusChanged(CFNotificationCenterRef center, void *observer,
     groupBy = [([file objectForKey:@"GroupBy"] ?: @(0)) intValue];
     useIcons = [([file objectForKey:@"UseIcons"] ?: @(NO)) boolValue];
     NSString *iconTheme = [([file objectForKey:@"IconTheme"] ?: @"Default") stringValue];
-    iconClearAllPath = [NSString stringWithFormat:ICON_CLEAR_ALL_PATH, iconTheme];
-    iconCollapsePath = [NSString stringWithFormat:ICON_COLLAPSE_PATH, iconTheme];
+    currentTheme = [SXITheme themeWithPath:[SXIThemesDirectory stringByAppendingPathComponent:iconTheme]];
+
     if (useIcons) {
         buttonWidth = 45;
     }

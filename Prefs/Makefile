@@ -1,7 +1,7 @@
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = StackXIPrefs
-$(BUNDLE_NAME)_FILES = Preferences.m IconThemes.m
+$(BUNDLE_NAME)_FILES = Preferences.m IconThemes.m ../SXICommon.m
 $(BUNDLE_NAME)_INSTALL_PATH = /Library/PreferenceBundles
 $(BUNDLE_NAME)_FRAMEWORKS = UIKit
 $(BUNDLE_NAME)_PRIVATE_FRAMEWORKS = Preferences

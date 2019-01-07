@@ -6,67 +6,6 @@
 @end
 
 #define MARGIN 5
-#define kThemesDirectory @"/Library/StackXI/"
-
-@implementation SXITheme
-
-@synthesize name, image;
-
-+ (UIImage*)mergeImage:(UIImage*)first withImage:(UIImage*)second
-{
-    CGImageRef firstImageRef = first.CGImage;
-    CGFloat firstWidth = CGImageGetWidth(firstImageRef);
-    CGFloat firstHeight = CGImageGetHeight(firstImageRef);
-    
-    CGImageRef secondImageRef = second.CGImage;
-    CGFloat secondWidth = CGImageGetWidth(secondImageRef);
-    CGFloat secondHeight = CGImageGetHeight(secondImageRef);
-    
-    CGSize mergedSize = CGSizeMake(firstWidth + secondWidth + 5, MAX(firstHeight, secondHeight));
-    UIGraphicsBeginImageContext(mergedSize);
-    
-    [first drawInRect:CGRectMake(0, 0, firstWidth, firstHeight)];
-    [second drawInRect:CGRectMake(firstWidth + 5, 0, secondWidth, secondHeight)]; 
-    
-    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return newImage;
-}
-
-+ (SXITheme*)themeWithPath:(NSString*)path {
-    return [[SXITheme alloc] initWithPath:path];
-}
-
-- (id)initWithPath:(NSString*)path {
-    BOOL isDir = NO;
-    BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir];
-    
-    if (!exists || !isDir) {
-        [self release];
-        return nil;
-    }
-    
-    if ((self = [super init])) {
-        self.name = [[path lastPathComponent] stringByDeletingPathExtension];
-        UIImage *clearAll = [UIImage imageWithContentsOfFile:[path stringByAppendingPathComponent:@"SXIClearAll.png"]];
-        UIImage *collapse = [UIImage imageWithContentsOfFile:[path stringByAppendingPathComponent:@"SXICollapse.png"]];
-
-        self.image = [SXITheme mergeImage:collapse withImage:clearAll];
-        if (!self.image) {
-            [self release];
-            return nil;
-        }
-    }
-    return self;
-}
-
-- (void)dealloc {
-    self.name = nil;
-    self.image = nil;
-    [super dealloc];
-}
-
-@end
 
 @implementation SXIAlignedTableViewCell
 - (void) layoutSubviews {
@@ -121,10 +60,11 @@
     NSArray *diskThemes = [manager contentsOfDirectoryAtPath:directory error:nil];
     
     for (NSString *dirName in diskThemes) {
-        NSString *path = [kThemesDirectory stringByAppendingPathComponent:dirName];
+        NSString *path = [SXIThemesDirectory stringByAppendingPathComponent:dirName];
         SXITheme *theme = [SXITheme themeWithPath:path];
         
         if (theme) {
+            [theme preparePreviewImage];
             [self.themes addObject:theme];
         }
     }
@@ -132,7 +72,7 @@
 
 - (void)refreshList {
     self.themes = [[NSMutableArray alloc] initWithCapacity:100];
-    [self addThemesFromDirectory: kThemesDirectory];
+    [self addThemesFromDirectory: SXIThemesDirectory];
             
     NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES selector:@selector(caseInsensitiveCompare:)];
     [self.themes sortUsingDescriptors:[NSArray arrayWithObject:descriptor]];

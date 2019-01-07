@@ -14,13 +14,3 @@
 @property (nonatomic, retain) NSMutableArray *themes;
 
 @end
-
-@interface SXITheme : NSObject
-
-@property (nonatomic, copy) NSString *name;
-@property (nonatomic, retain) UIImage *image;
-+ (UIImage*)mergeImage:(UIImage*)first withImage:(UIImage*)second;
-+ (SXITheme *)themeWithPath:(NSString *)path;
-- (id)initWithPath:(NSString *)path;
-
-@end

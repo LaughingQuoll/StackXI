@@ -5,6 +5,7 @@
 #import <BulletinBoard/BBDataProvider.h>
 #import <BulletinBoard/BBBulletin.h>
 #import <BulletinBoard/BBAction.h>
+#import "../SXICommon.h"
 
 @interface BBBulletin(StackXI)
 
