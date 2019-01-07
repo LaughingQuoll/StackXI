@@ -916,8 +916,10 @@ static void fakeNotifications() {
         [lv _headerContentView].hidden = !self.notificationRequest.sxiVisible;
 
         if (!self.notificationRequest.sxiVisible) {
+            self.view.userInteractionEnabled = false;
             lv.alpha = 0.7;
         } else {
+            self.view.userInteractionEnabled = true;
             lv.alpha = 1.0;
         }
     }
@@ -989,6 +991,10 @@ static void fakeNotifications() {
         }];
         [self.notificationRequest sxiExpand];
         return;
+    }
+
+    if (!inBanner && !self.notificationRequest.sxiVisible) {
+        return; // don't allow taps on stacked notifications
     }
 
     return %orig;
