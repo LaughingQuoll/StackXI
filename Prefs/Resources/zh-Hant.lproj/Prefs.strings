@@ -1,13 +1,17 @@
 {
-  "ENABLED" = "開啟";
-  "SHOW_BUTTONS" = '顯示 "折疊" / "清除所有" 按鈕';
-  "USE_ICONS" = "使用圖標代替文本按鈕";
-  "RESPRING" = "註銷";
-  "ARE_YOU_SURE_TO_RESET_PREFS" = "確定要重置所有默認選項嗎？這是不能撤銷的。";
-  "OK" = "好";
-  "CANCEL" = "取消";
-  "RESET_PREFS" = "恢復默認選項并註銷";
-  "SOURCE_CODE" = "源代碼";
-  "DONATE_TO_NEPETA" = "捐贈Nepeta";
-  "SUPPORT_ME" = "支持我!";
+    "ARE_YOU_SURE_TO_RESET_PREFS" = "\U78ba\U5b9a\U8981\U91cd\U7f6e\U6240\U6709\U9ed8\U8a8d\U9078\U9805\U4e26\U4e14\U8a3b\U92b7\U624b\U6a5f\U55ce\Uff1f\U9019\U662f\U4e0d\U80fd\U64a4\U92b7\U7684\U3002";
+    CANCEL = "\U53d6\U6d88";
+    "DONATE_TO_NEPETA" = "\U6350\U8d08Nepeta";
+    ENABLED = "\U958b\U555f";
+    "ICON_THEME" = "\U9078\U64c7\U6309\U9215\U4e3b\U984c\Uff1a";
+    OFF = "\U96b1\U85cf\U6309\U9215";
+    OK = "\U78ba\U5b9a";
+    "RESET_PREFS" = "\U6062\U5fa9\U9ed8\U8a8d";
+    RESPRING = "\U8a3b\U92b7\U624b\U6a5f";
+    "SHOW_BUTTONS" = "\U986f\U793a \"\U6298\U758a\" / \"\U6e05\U9664\U6240\U6709\" \U6309\U9215";
+    "SOURCE_CODE" = "\U6e90\U4ee3\U78bc";
+    "SUPPORT_ME" = "\U652f\U6301\U6211!";
+    StackXI = StackXI;
+    "USE_ICONS" = "\U4f7f\U7528\U5716\U6a19\U4ee3\U66ff\U6587\U672c\U6309\U9215";
+    "iOS 12" = "iOS 12 \U6a23\U5f0f";
 }
