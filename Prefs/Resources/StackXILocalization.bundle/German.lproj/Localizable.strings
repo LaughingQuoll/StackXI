@@ -1,4 +1,4 @@
 "CLEAR"="Alle löschen";
 "COLLAPSE"="Weniger";
-"ONE_MORE_NOTIFICATION"="%d weitere Mitteilung";
-"MORE_NOTIFICATIONS"="%d weitere Mitteilungen";
+"ONE_MORE_NOTIFICATION"="%@ weitere Mitteilung";
+"MORE_NOTIFICATIONS"="%@ weitere Mitteilungen";

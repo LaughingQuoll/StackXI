@@ -1,4 +1,4 @@
 "CLEAR"="Fjärr";
 "COLLAPSE"="Visa mindre";
-"ONE_MORE_NOTIFICATION"="%d Fler meddelanden";
-"MORE_NOTIFICATIONS"="%d Fler meddelanden";
+"ONE_MORE_NOTIFICATION"="%@ Fler meddelanden";
+"MORE_NOTIFICATIONS"="%@ Fler meddelanden";

@@ -1,4 +1,4 @@
 "CLEAR"="Fjern";
 "COLLAPSE"="Vis mindre";
-"ONE_MORE_NOTIFICATION"="%d Flere notifikasjoner";
-"MORE_NOTIFICATIONS"="%d Flere notifikasjoner";
+"ONE_MORE_NOTIFICATION"="%@ Flere notifikasjoner";
+"MORE_NOTIFICATIONS"="%@ Flere notifikasjoner";

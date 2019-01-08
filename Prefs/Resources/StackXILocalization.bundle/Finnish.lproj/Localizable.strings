@@ -1,4 +1,4 @@
 "CLEAR"="Tyhjennä kaikki";
 "COLLAPSE"="Piilota";
-"ONE_MORE_NOTIFICATION"="%d uusi ilmoitus";
-"MORE_NOTIFICATIONS"="%d uutta ilmoitusta";
+"ONE_MORE_NOTIFICATION"="%@ uusi ilmoitus";
+"MORE_NOTIFICATIONS"="%@ uutta ilmoitusta";

@@ -1,4 +1,4 @@
 "CLEAR"="Verwijder";
 "COLLAPSE"="Voeg Samen";
-"ONE_MORE_NOTIFICATION"="%d notificatie";
-"MORE_NOTIFICATIONS"="%d notificaties";
+"ONE_MORE_NOTIFICATION"="%@ notificatie";
+"MORE_NOTIFICATIONS"="%@ notificaties";

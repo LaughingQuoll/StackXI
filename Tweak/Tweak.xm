@@ -16,6 +16,7 @@ static NCNotificationListCollectionView *listCollectionView = nil;
 static NCNotificationCombinedListViewController *clvc = nil;
 static NCNotificationStore *store = nil;
 static NCNotificationDispatcher *dispatcher = nil;
+static NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
 static bool useIcons = false;
 static bool canUpdate = true;
 static bool isOnLockscreen = true;
@@ -1128,9 +1129,9 @@ static void fakeNotifications() {
 
             int count = [self.notificationRequest.sxiStackedNotificationRequests count];
             if (count == 1) {
-                self.sxiNotificationCount.text = [NSString stringWithFormat:[translationDict objectForKey:kOneMoreNotif], count];
+                self.sxiNotificationCount.text = [NSString stringWithFormat:[translationDict objectForKey:kOneMoreNotif], [formatter stringFromNumber:@(count)]];
             } else {
-                self.sxiNotificationCount.text = [NSString stringWithFormat:[translationDict objectForKey:kMoreNotifs], count];
+                self.sxiNotificationCount.text = [NSString stringWithFormat:[translationDict objectForKey:kMoreNotifs], [formatter stringFromNumber:@(count)]];
             }
         } else if (showButtons > 0) {
             if (showButtons == 1) {
@@ -1483,13 +1484,15 @@ void reloadPreferences() {
     debug = true;
     #endif
 
+    formatter.numberStyle = NSNumberFormatterNoStyle;
+
     if (enabled) {
         NSBundle *langBundle = [NSBundle bundleWithPath:LANG_BUNDLE_PATH];
         translationDict = @{
             kClear : langBundle ? [langBundle localizedStringForKey:kClear value:@"Clear All" table:nil] : @"Clear All",
             kCollapse : langBundle ? [langBundle localizedStringForKey:kCollapse value:@"Collapse" table:nil] : @"Collapse",
-            kOneMoreNotif : langBundle ? [langBundle localizedStringForKey:kOneMoreNotif value:@"%d more notification" table:nil] : @"%d more notification",
-            kMoreNotifs : langBundle ? [langBundle localizedStringForKey:kMoreNotifs value:@"%d more notifications" table:nil] : @"%d more notifications"
+            kOneMoreNotif : langBundle ? [langBundle localizedStringForKey:kOneMoreNotif value:@"%@ more notification" table:nil] : @"%@ more notification",
+            kMoreNotifs : langBundle ? [langBundle localizedStringForKey:kMoreNotifs value:@"%@ more notifications" table:nil] : @"%@ more notifications"
         };
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, displayStatusChanged, CFSTR("com.apple.iokit.hid.displayStatus"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
         %init(StackXI);

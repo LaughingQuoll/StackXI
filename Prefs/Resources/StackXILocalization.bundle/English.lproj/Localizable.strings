@@ -1,4 +1,4 @@
 "CLEAR"="Clear All";
 "COLLAPSE"="Collapse";
-"ONE_MORE_NOTIFICATION"="%d more notification";
-"MORE_NOTIFICATIONS"="%d more notifications";
+"ONE_MORE_NOTIFICATION"="%@ more notification";
+"MORE_NOTIFICATIONS"="%@ more notifications";
