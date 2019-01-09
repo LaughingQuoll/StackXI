@@ -1,4 +1,5 @@
 #import "Tweak.h"
+#import <QuartzCore/QuartzCore+Private.h>
 
 #define kClear @"CLEAR"
 #define kCollapse @"COLLAPSE"
@@ -50,27 +51,32 @@ UIImage * imageWithView(UIView *view) {
     return img;
 }
 @implementation SXIButton
+- (id)initWithFrame:(CGRect)frame {
+  self = [super initWithFrame:frame];
 
-@synthesize blur, vibrancy;
+  self.backdropView = [[_UIBackdropView alloc] initWithStyle:1000];
 
+  self.backdropView.frame = self.bounds;
+  self.backdropView.userInteractionEnabled = false;
+
+  [self insertSubview:self.backdropView atIndex:0];
+
+  self.overlayView = [[UIView alloc] init];
+  self.overlayView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:0.2];
+  [self addSubview:self.overlayView];
+
+  self.button = [[UIButton alloc] init];
+  self.button.frame = self.bounds;
+  [self addSubview:self.button];
+
+	self.button.layer.compositingFilter = @"destOut";
+
+  return self;
+}
 - (void)addBlurEffect {
-    UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
-    UIVisualEffectView *blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
-    blurView.frame = self.bounds;
-    blurView.userInteractionEnabled = false;
-
-    UIVisualEffectView *vibrancyView = [[UIVisualEffectView alloc] initWithEffect:[UIVibrancyEffect effectForBlurEffect:blurEffect]];
-    vibrancyView.frame = self.bounds;
-    vibrancyView.userInteractionEnabled = false;
-
-    self.blur = blurView;
-    self.vibrancy = vibrancyView;
-
-    [[blur contentView] addSubview:vibrancyView];
-    [self insertSubview:blurView atIndex:0];
-    if (UIImageView *imageView = self.imageView) {
-        [self bringSubviewToFront:imageView];
-    }
+  self.backdropView.frame = self.bounds;
+  self.button.frame = self.bounds;
+  self.overlayView.frame = self.bounds;
 }
 
 @end
@@ -134,7 +140,7 @@ static void fakeNotifications() {
   if (bbServer == self) {
     bbServer = nil;
   }
-  
+
   %orig;
 }
 %end
@@ -147,7 +153,7 @@ static void fakeNotifications() {
 
 -(void)viewDidLoad{
     %orig;
-    sbdbclvc = self; 
+    sbdbclvc = self;
 }
 
 %end
@@ -211,7 +217,7 @@ static void fakeNotifications() {
     for (NCNotificationRequest *request in self.sxiStackedNotificationRequests) {
         request.sxiVisible = true;
     }
-    
+
     [listCollectionView sxiExpand:[self sxiStackID]];
 }
 
@@ -224,7 +230,7 @@ static void fakeNotifications() {
     for (NCNotificationRequest *request in self.sxiStackedNotificationRequests) {
         request.sxiVisible = false;
     }
-    
+
     [listCollectionView sxiCollapse:[self sxiStackID]];
 }
 
@@ -251,7 +257,7 @@ static void fakeNotifications() {
     for (NCNotificationRequest *request in self.sxiStackedNotificationRequests) {
         [request sxiClear:false];
     }
-    
+
     [self sxiClear:false];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (animationDurationClear*animationMultiplier) * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         canUpdate = true;
@@ -425,7 +431,7 @@ static void fakeNotifications() {
             if (lastStack && [lastSection isEqualToString:stackID]) {
                 [lastStack sxiInsertRequest:req];
             }
-            
+
             if (req.sxiPositionInStack <= MAX_SHOW_BEHIND || [expandedSection isEqualToString:stackID]) {
                 [self.requests addObject:req];
             }
@@ -622,28 +628,28 @@ static void fakeNotifications() {
         self.sxiFeedbackGenerator = [UINotificationFeedbackGenerator new];
     }
     self.sxiClearAllButton = [[SXIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
-    [self.sxiClearAllButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
+    [self.sxiClearAllButton.button.titleLabel setFont:[UIFont systemFontOfSize:12]];
     self.sxiClearAllButton.hidden = NO;
     self.sxiClearAllButton.alpha = 1.0;
-    [self.sxiClearAllButton setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
+    [self.sxiClearAllButton.button setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
     //self.sxiClearAllButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
-    [self.sxiClearAllButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [self.sxiClearAllButton.button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     self.sxiClearAllButton.layer.masksToBounds = true;
     self.sxiClearAllButton.layer.cornerRadius = clearAllHeight/2.0;
-    self.sxiClearAllButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+    self.sxiClearAllButton.button.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
     [self.sxiClearAllButton addBlurEffect];
 
-    [self.sxiClearAllButton addTarget:self action:@selector(sxiClearAll:) forControlEvents:UIControlEventTouchUpInside];
+    [self.sxiClearAllButton.button addTarget:self action:@selector(sxiClearAll:) forControlEvents:UIControlEventTouchUpInside];
     [self.view.subviews[0] addSubview:self.sxiClearAllButton];
 
     float inset = 5.0;
-    self.sxiClearAllButton.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
-    self.sxiClearAllButton.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
+    self.sxiClearAllButton.button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+    self.sxiClearAllButton.button.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
 
-    self.sxiClearAllButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
-    [self.sxiClearAllButton setTitle:NULL forState:UIControlStateNormal];
+    self.sxiClearAllButton.button.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    [self.sxiClearAllButton.button setTitle:NULL forState:UIControlStateNormal];
     UIImage *btnClearAllImage = [currentTheme getIcon:@"SXIClearAll.png"];
-    [self.sxiClearAllButton setImage:btnClearAllImage forState:UIControlStateNormal];
+    [self.sxiClearAllButton.button setImage:btnClearAllImage forState:UIControlStateNormal];
     self.sxiClearAllButton.tintColor = [UIColor blackColor];
 
     self.sxiClearAllConfirm = false;
@@ -680,27 +686,26 @@ static void fakeNotifications() {
         titleInsets = UIEdgeInsetsMake(0, 0, 0, (-clearAllExpandedWidth + clearAllImageWidth)/2);
     }
 
-    [self.sxiClearAllButton.titleLabel setTextAlignment:NSTextAlignmentCenter];
+    [self.sxiClearAllButton.button.titleLabel setTextAlignment:NSTextAlignmentCenter];
 
     [UIView animateWithDuration:(animationDurationDefault*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
         self.sxiClearAllButton.frame = [self sxiGetClearAllButtonFrame];
-        self.sxiClearAllButton.vibrancy.frame = self.sxiClearAllButton.bounds;
-        self.sxiClearAllButton.blur.frame = self.sxiClearAllButton.bounds;
-        
-        self.sxiClearAllButton.imageEdgeInsets = insets;
-        self.sxiClearAllButton.titleEdgeInsets = titleInsets;
+        self.sxiClearAllButton.backdropView.frame = self.sxiClearAllButton.bounds;
+
+        self.sxiClearAllButton.button.imageEdgeInsets = insets;
+        self.sxiClearAllButton.button.titleEdgeInsets = titleInsets;
     } completion:NULL];
 }
 
 %new;
 -(void)sxiClearAll:(UIButton *)button {
     if (!self.sxiClearAllConfirm) {
-        [self.sxiClearAllButton setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
+        [self.sxiClearAllButton.button setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
         self.sxiClearAllConfirm = true;
         [self sxiUpdateClearAllButton];
         [self.sxiFeedbackGenerator prepare];
     } else {
-        [self.sxiClearAllButton setTitle:NULL forState: UIControlStateNormal];
+        [self.sxiClearAllButton.button setTitle:NULL forState: UIControlStateNormal];
         [self _clearAllPriorityListNotificationRequests];
         [self.sxiFeedbackGenerator notificationOccurred:UINotificationFeedbackTypeSuccess];
     }
@@ -744,10 +749,10 @@ static void fakeNotifications() {
     }
 
     NCNotificationListCell* cell = %orig;
-    
+
     if (!cell.contentViewController.notificationRequest.sxiVisible) {
         if (cell.contentViewController.notificationRequest.sxiPositionInStack > MAX_SHOW_BEHIND) {
-            cell.hidden = YES; 
+            cell.hidden = YES;
         } else {
             cell.hidden = NO;
             if (cell.frame.size.height != 50) {
@@ -757,7 +762,7 @@ static void fakeNotifications() {
     } else {
         cell.hidden = NO;
     }
-    
+
     return cell;
 }
 
@@ -1015,46 +1020,46 @@ static void fakeNotifications() {
 
         if (showButtons > 0) {
             self.sxiClearAllButton = [[SXIButton alloc] initWithFrame:[self sxiGetClearAllButtonFrame]];
-            [self.sxiClearAllButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
+            [self.sxiClearAllButton.button.titleLabel setFont:[UIFont systemFontOfSize:12]];
             self.sxiClearAllButton.hidden = YES;
             self.sxiClearAllButton.alpha = 0.0;
-            [self.sxiClearAllButton setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
+            [self.sxiClearAllButton.button setTitle:[translationDict objectForKey:kClear] forState: UIControlStateNormal];
             //self.sxiClearAllButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
-            [self.sxiClearAllButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+            [self.sxiClearAllButton.button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
             self.sxiClearAllButton.layer.masksToBounds = true;
             self.sxiClearAllButton.layer.cornerRadius = buttonHeight/2.0;
             [self.sxiClearAllButton addBlurEffect];
 
             self.sxiCollapseButton = [[SXIButton alloc] initWithFrame:[self sxiGetCollapseButtonFrame]];
-            [self.sxiCollapseButton.titleLabel setFont:[UIFont systemFontOfSize:12]];
+            [self.sxiCollapseButton.button.titleLabel setFont:[UIFont systemFontOfSize:12]];
             self.sxiCollapseButton.hidden = YES;
             self.sxiCollapseButton.alpha = 0.0;
-            [self.sxiCollapseButton setTitle:[translationDict objectForKey:kCollapse] forState:UIControlStateNormal];
+            [self.sxiCollapseButton.button setTitle:[translationDict objectForKey:kCollapse] forState:UIControlStateNormal];
             //self.sxiCollapseButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
-            [self.sxiCollapseButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+            [self.sxiCollapseButton.button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
             self.sxiCollapseButton.layer.masksToBounds = true;
             self.sxiCollapseButton.layer.cornerRadius = buttonHeight/2.0;
             [self.sxiCollapseButton addBlurEffect];
-            
-            [self.sxiClearAllButton addTarget:self action:@selector(sxiClearAll:) forControlEvents:UIControlEventTouchUpInside];
-            [self.sxiCollapseButton addTarget:self action:@selector(sxiCollapse:) forControlEvents:UIControlEventTouchUpInside];
-            
+
+            [self.sxiClearAllButton.button addTarget:self action:@selector(sxiClearAll:) forControlEvents:UIControlEventTouchUpInside];
+            [self.sxiCollapseButton.button addTarget:self action:@selector(sxiCollapse:) forControlEvents:UIControlEventTouchUpInside];
+
             if (useIcons) {
                 float inset = 2.5;
                 if (showButtons == 2) inset = 5.0;
-                self.sxiClearAllButton.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
-                self.sxiCollapseButton.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
+                self.sxiClearAllButton.button.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
+                self.sxiCollapseButton.button.imageEdgeInsets = UIEdgeInsetsMake(inset, inset, inset, inset);
 
-                self.sxiCollapseButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
-                [self.sxiCollapseButton setTitle:NULL forState:UIControlStateNormal];
+                self.sxiCollapseButton.button.imageView.contentMode = UIViewContentModeScaleAspectFit;
+                [self.sxiCollapseButton.button setTitle:NULL forState:UIControlStateNormal];
                 UIImage *btnCollapseImage = [currentTheme getIcon:@"SXICollapse.png"];
-                [self.sxiCollapseButton setImage:btnCollapseImage forState:UIControlStateNormal];
+                [self.sxiCollapseButton.button setImage:btnCollapseImage forState:UIControlStateNormal];
                 self.sxiCollapseButton.tintColor = [UIColor blackColor];
 
-                self.sxiClearAllButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
-                [self.sxiClearAllButton setTitle:NULL forState:UIControlStateNormal];
+                self.sxiClearAllButton.button.imageView.contentMode = UIViewContentModeScaleAspectFit;
+                [self.sxiClearAllButton.button setTitle:NULL forState:UIControlStateNormal];
                 UIImage *btnClearAllImage = [currentTheme getIcon:@"SXIClearAll.png"];
-                [self.sxiClearAllButton setImage:btnClearAllImage forState:UIControlStateNormal];
+                [self.sxiClearAllButton.button setImage:btnClearAllImage forState:UIControlStateNormal];
                 self.sxiClearAllButton.tintColor = [UIColor blackColor];
             }
 
@@ -1247,7 +1252,7 @@ static void fakeNotifications() {
         if (!c) continue;
         NCNotificationListCell* cell = (NCNotificationListCell*)c;
         if ([notificationIdentifier isEqualToString:cell.contentViewController.notificationRequest.notificationIdentifier]) {
-            
+
             [UIView animateWithDuration:(animationDurationClear*animationMultiplier) delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
                 cell.alpha = 0.0;
             } completion:NULL];
@@ -1282,10 +1287,10 @@ static void fakeNotifications() {
         if (!request.bulletin.sectionID) continue;
 
         NSString *stackID = [request sxiStackID];
-        if (![sectionIDs containsObject:stackID] && request.sxiIsStack && request.sxiIsExpanded) {	
-            [request sxiCollapse];	
-            [sectionIDs addObject:stackID];	
-        }	
+        if (![sectionIDs containsObject:stackID] && request.sxiIsStack && request.sxiIsExpanded) {
+            [request sxiCollapse];
+            [sectionIDs addObject:stackID];
+        }
     }
 
     [listCollectionView reloadData];
@@ -1441,8 +1446,13 @@ void reloadPreferences() {
     groupBy = [([file objectForKey:@"GroupBy"] ?: @(0)) intValue];
     useIcons = [([file objectForKey:@"UseIcons"] ?: @(YES)) boolValue];
     showClearAllButton = [([file objectForKey:@"ShowClearAll"] ?: @(YES)) boolValue];
-    NSString *iconTheme = [([file objectForKey:@"IconTheme"] ?: @"Default") stringValue];
-    currentTheme = [SXITheme themeWithPath:[SXIThemesDirectory stringByAppendingPathComponent:iconTheme]];
+
+    NSString *iconTheme = [file objectForKey:@"IconTheme"];
+    if(!iconTheme){
+      iconTheme = @"Default";
+    }
+
+    currentTheme = [SXITheme themeWithPath:[SXIThemesDirectory stringByAppendingPathComponent:@"Default"]];
 
     int speed = [([file objectForKey:@"AnimationSpeed"] ?: @(5)) intValue];
     animationMultiplier = (10.0-speed)*2.0/10.0;
